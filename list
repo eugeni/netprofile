@@ -17,3 +17,4 @@
 /etc/sysconfig/network-scripts/cellular.d/
 /etc/sysconfig/network-scripts/wireless.d/
 /etc/sysconfig/network-scripts/vpn.d/
+/var/lib/dhcp/*leases
