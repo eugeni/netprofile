@@ -1,0 +1,4 @@
+ o manage files under rcs or cvs.
+
+ o have a way to copy files in all profiles when we first install
+ packages having files under netprofile control.

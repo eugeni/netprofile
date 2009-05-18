@@ -1,0 +1,301 @@
+2005-12-06 23:37  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.ifup: first version
+
+2005-12-06 23:20  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.10-1mdk
+
+2005-12-06 23:02  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: allow a -n option to not restart the network
+	  service.
+
+2005-12-06 22:58  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: install the ifup.d script.
+
+2005-04-07 13:13  Warly <warly at mandriva.com>
+
+	* netprofile.spec, set-netprofile: fix background copy
+
+2005-03-29 20:25  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.9.1-1mdk
+
+2005-03-29 20:21  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: fix return code.
+
+2005-03-29 14:39  Olivier Blin <oblin at mandriva.com>
+
+	* set-netprofile: reload net_applet only after "current" file is
+	  written
+
+2005-03-24 16:22  Olivier Blin <oblin at mandriva.com>
+
+	* set-netprofile: set-netprofile: make net_applet reload the
+	  configuration
+
+2005-03-24 09:32  Warly <warly at mandriva.com>
+
+	* netprofile.spec, set-netprofile: Try to have a better look when
+	  we are in silent mode of bootsplash
+
+2005-03-03 21:48  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: removed prefix
+
+2005-03-03 21:29  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.8-1mdk
+
+2005-03-03 21:23  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: added RPMOPT variable to be able to pass options to
+	  rpm.
+
+2005-03-03 21:21  Frederic Lepied <flepied at mandriva.com>
+
+	* TODO: add comment about package issues.
+
+2005-03-03 21:20  Frederic Lepied <flepied at mandriva.com>
+
+	* add-to-netprofile: copy the file anyway to be able to force a
+	  copy to be the same in all profiles.
+
+2005-03-03 21:19  Frederic Lepied <flepied at mandriva.com>
+
+	* remove-from-netprofile: fix filename in comments.
+
+2005-03-03 21:18  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: be compatible with profile names given on the
+	  command line.
+
+2005-02-04 19:47  Warly <warly at mandriva.com>
+
+	* set-netprofile: use a theme specific directory for gtkrc file
+
+2005-02-04 19:35  Warly <warly at mandriva.com>
+
+	* netprofile.spec: fix typo in release name
+
+2005-02-04 19:28  Warly <warly at mandriva.com>
+
+	* netprofile.spec, set-netprofile: include fbmenu call
+
+2004-09-29 09:28  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.7.3-1mdk
+
+2004-09-29 09:28  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: back to using previously set profile is none is
+	  requested
+
+2004-09-29 04:43  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.7.2-1mdk
+
+2004-09-29 04:34  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile:  o fix bug when changing the hostname at boot
+	  (reported by Charles Davant).
+	   o assume we want the default one if no profile name is
+	    specified. This allows to avoid setting PROFILE=default in
+	    lilo.conf.
+	   o use set_hostname from network-functions to work cleanly with
+	  s2u
+
+2004-09-28 09:34  Thierry Vignaud <tvignaud at mandriva.com>
+
+	* list: save and restore new peer file for ppp links (#11716)
+
+2004-06-28 06:35  Frederic Lepied <flepied at mandriva.com>
+
+	* add-netprofile, del-netprofile: renamed
+
+2004-06-28 06:34  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.7.1-1mdk
+
+2004-06-28 06:34  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: switch to the new names add-to-netprofile and
+	  remove-from-netprofile
+
+2004-06-28 06:32  Frederic Lepied <flepied at mandriva.com>
+
+	* add-to-netprofile, remove-from-netprofile: first version
+
+2004-06-24 01:34  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.7-1mdk
+
+2004-06-24 01:33  Frederic Lepied <flepied at mandriva.com>
+
+	* clone-netprofile, netprofile.spec, save-netprofile,
+	  set-netprofile: Mandrakelinux
+
+2004-06-24 01:32  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: add add-netprofile and del-netprofile factorize the
+	  installation of scripts
+
+2004-06-24 01:30  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: use && as it's easiest to read
+
+2004-06-24 01:02  Frederic Lepied <flepied at mandriva.com>
+
+	* add-netprofile, del-netprofile: first version
+
+2004-03-17 09:58  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.6.3-1mdk
+
+2004-03-17 09:52  Frederic Lepied <flepied at mandriva.com>
+
+	* list: yp and ntp files
+
+2004-03-17 09:49  Frederic Lepied <flepied at mandriva.com>
+
+	* list: add localtime
+
+2004-01-07 11:34  Frederic Lepied <flepied at mandriva.com>
+
+	* list: added missing files for ppp (Michael Reinsch)
+
+2003-12-26 15:48  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.6.1-1mdk
+
+2003-12-26 15:47  Frederic Lepied <flepied at mandriva.com>
+
+	* list: added proxy files
+
+2003-09-12 18:16  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.6-1mdk
+
+2003-09-12 18:16  Frederic Lepied <flepied at mandriva.com>
+
+	* save-netprofile: first shot to support spaces in profile name
+
+2003-09-12 18:15  Frederic Lepied <flepied at mandriva.com>
+
+	* clone-netprofile: when cloning the current profile, save it
+	  before cloning.
+
+2003-09-12 18:13  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: reset hostname if needed corrected the management
+	  of services
+
+2003-09-08 18:20  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.5.3-1mdk
+
+2003-08-29 11:49  Frederic Lepied <flepied at mandriva.com>
+
+	* list: completed list (Thierry)
+
+2003-08-26 21:30  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.5.2-1mdk
+
+2003-08-26 21:30  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: corrected startup
+
+2003-08-07 22:53  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.5.1-1mdk
+
+2003-08-07 22:51  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: added install of bash completions file
+
+2003-08-07 22:51  Frederic Lepied <flepied at mandriva.com>
+
+	* bash.completion: first version from Guillaume Rousse
+
+2003-07-07 11:27  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.5-1mdk
+
+2003-07-07 11:26  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: check that we are on a running system (not at
+	  boot) using /var/run/runlevel.dir
+
+2003-07-07 11:25  Frederic Lepied <flepied at mandriva.com>
+
+	* save-netprofile: save all the configured services
+
+2003-07-07 09:51  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.4-1mdk
+
+2003-07-07 09:50  Frederic Lepied <flepied at mandriva.com>
+
+	* Makefile: don't need a service anymore
+
+2003-06-03 00:24  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: allow to be called without argument and if this
+	  is the case read the profile name from the kernel command line.
+
+2003-05-26 09:32  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile: don't add a start level. Let mandrake_everytime call
+	  it.
+
+2003-05-26 09:28  Frederic Lepied <flepied at mandriva.com>
+
+	* .cvsignore: added tar archives
+
+2003-04-05 23:14  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.3-1mdk
+
+2003-04-05 23:12  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: start/stop services when called on an already
+	  running system
+
+2003-04-05 23:11  Frederic Lepied <flepied at mandriva.com>
+
+	* save-netprofile: fixed typo
+
+2003-04-02 22:30  Frederic Lepied <flepied at mandriva.com>
+
+	* TODO: first version
+
+2003-04-02 22:28  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile.spec: 0.2-1mdk
+
+2003-04-02 22:27  Frederic Lepied <flepied at mandriva.com>
+
+	* netprofile: corrected typo
+
+2003-04-02 22:26  Frederic Lepied <flepied at mandriva.com>
+
+	* set-netprofile: restore the services too
+
+2003-04-02 22:26  Frederic Lepied <flepied at mandriva.com>
+
+	* save-netprofile: save the services too
+
+2003-03-25 00:08  Frederic Lepied <flepied at mandriva.com>
+
+	* list, Makefile, clone-netprofile, netprofile, netprofile.spec,
+	  save-netprofile, set-netprofile: Initial revision
+
+2003-03-25 00:08  Frederic Lepied <flepied at mandriva.com>
+
+	* list, Makefile, clone-netprofile, netprofile, netprofile.spec,
+	  save-netprofile, set-netprofile: initial import
+

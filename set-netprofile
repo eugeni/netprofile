@@ -1,0 +1,186 @@
+#!/bin/bash
+#---------------------------------------------------------------
+# Project         : Mandriva Linux
+# Module          : netprofile
+# File            : set-netprofile
+# Version         : $Id: set-netprofile,v 1.20 2005/12/06 22:02:14 flepied Exp $
+# Author          : Frederic Lepied
+# Created On      : Fri Mar 21 21:33:06 2003
+#---------------------------------------------------------------
+
+TOP=${TOP=/etc/netprofile}
+
+. /etc/sysconfig/network-scripts/network-functions
+
+#DBG=-v
+
+NO_RESTART_NETWORK=
+
+# assume cwd is /etc/init.d
+stop() {
+    for s in $1; do
+	if [[ ! -f "$SERVICES/$s" ]]; then
+	    [[ -x $s ]] || continue
+	    [[ ! -e /var/lock/subsys/$s ]] && continue
+	    grep -q chkconfig $s || continue
+	    echo $(egrep -a '^#.*chkconfig: ' $s|awk '{print $5}') $s
+	fi
+    done | sort -n | cut -d" " -f2
+}
+
+# assume cwd is /etc/init.d
+start() {
+    for s in $2; do
+	[[ -x "$s" ]] || continue
+	[[ -e /var/lock/subsys/"$s" ]] && continue
+	grep -q chkconfig $s || continue
+	echo $(egrep -a '^#.*chkconfig: ' $s|awk '{print $4}') $s
+    done | sort -n | cut -d" " -f2    
+}
+
+restoreprofile() {
+    while read w; do
+	for s in `ls $FILES/$w 2> /dev/null`; do
+	    if [[ -r $s ]]; then
+		f=$(echo $s | sed "s@$FILES@@")
+		mkdir $DBG -p `dirname $f`
+		cp $DBG -p "$s" "$f"
+	    fi
+	done
+    done < $TOP/list
+
+    OLD=`LC_ALL=C chkconfig --list | grep -v 'xinetd based services' | cut -f1`
+    
+    echo $OLD | xargs -n 1 chkconfig --del
+
+    cd "$SERVICES"
+
+    NEW=$(ls)
+    
+    echo $NEW | xargs -n 1 chkconfig --add
+    
+    unset HOSTNAME
+    [[ -r /etc/sysconfig/network ]] && . /etc/sysconfig/network
+    [[ -n "$HOSTNAME" ]] && set_hostname $HOSTNAME
+    
+    # if we are on a running system, stop and start services
+    if [[ -f /var/run/runlevel.dir ]]; then
+	cd /etc/init.d
+	
+	for s in $(stop "$OLD" "$NEW"); do
+	    if [ $s != network ]; then
+		/etc/init.d/$s stop
+	    fi
+	done
+
+	if [ "$NO_RESTART_NETWORK" != 1 ]; then
+	    service network restart
+	fi
+	
+	for s in $(start "$OLD" "$NEW"); do
+	    if [ $s != network ]; then
+		/etc/init.d/$s start
+	    fi
+	done
+    fi
+}
+
+if [ "$1" = '-n' ]; then
+    NO_RESTART_NETWORK=1
+    shift
+fi
+
+if [[ $# -gt 1 ]]; then
+    echo "usage: `basename $0` [-n] <profile>" 1>&2
+    exit 1
+fi
+
+NEWPROFILE="$1"
+
+if [[ -z "$NEWPROFILE" ]]; then
+    # Check the kernel command line, profile are selectable
+    # right from the boot manager
+    eval `cat /proc/cmdline | tr ' ' '\n' | grep PROFILE`
+    NEWPROFILE="$PROFILE"
+    if [[ -z "$NEWPROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
+	nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
+	if [[ "$nb_profiles" == "1" ]]; then
+	    NEWPROFILE=`basename /etc/netprofile/profiles/*`
+	else 
+	    _procsplash="`cat /proc/splash 2>/dev/null`"
+	    grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
+	    if [ -z "$_silent" -o ! -r /proc/splash -o -z "`echo $_procsplash|grep on`" ]; then
+		if [[ -x /usr/bin/fbgrab ]]; then
+		    rm -f /tmp/bootsplash.png
+		    /usr/bin/fbgrab /tmp/bootsplash.png
+		fi
+	    else
+		if [[ -z $res ]]; then 
+		    res=`fbresolution`
+		fi
+		if [[ -f /etc/sysconfig/bootsplash ]]; then
+		    . /etc/sysconfig/bootsplash
+		    theme=$THEME
+		    if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+			function box() { true; }
+			. /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+		    fi
+		fi
+		if [[ -f $silentjpeg ]]; then
+		    rm -f /tmp/bootsplash.png
+		    cp -f $silentjpeg /tmp/bootsplash.png
+		fi
+	    fi
+
+	    if [[ -r $TOP/current ]]; then
+		eval `cat $TOP/current`
+	    fi
+	    pushd  /etc/netprofile/profiles/
+	    if [[ -n "$PROFILE" ]]; then 
+		eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" "$PROFILE" * | grep RESULT`
+	    else 
+		eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" * | grep RESULT`
+	    fi
+	    if [[ "$_silent" == "yes" ]]; then
+		if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+		    /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+		fi
+	    fi
+	    NEWPROFILE="$RESULT"
+	    popd
+	fi
+    fi
+fi
+
+PROFILE=default
+
+if [[ -r $TOP/current ]]; then
+    eval `cat $TOP/current`
+fi
+
+if [[ "$NEWPROFILE" == "$PROFILE" || -z "$NEWPROFILE" ]]; then
+    exit 0
+fi
+
+if [[ ! -d $TOP/profiles/"$NEWPROFILE"/files ]]; then
+    echo "`basename $0`: unknown profile $NEWPROFILE" 1>&2
+    exit 1
+fi
+
+save-netprofile "$PROFILE" 1
+
+FILES="$TOP/profiles/$NEWPROFILE/files"
+SERVICES="$TOP/profiles/$NEWPROFILE/services"
+
+restoreprofile
+
+echo "PROFILE=\"$NEWPROFILE\"" > $TOP/current
+
+# make net_applet reload the configuration
+# (needs "current" file to be up to date)
+PID=`pidof -x net_applet`
+[[ -n "$PID" ]] && kill -HUP $PID
+
+:
+
+# set-netprofile ends here

@@ -1,0 +1,43 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrakelinux
+# Module          : netprofile
+# File            : add-to-netprofile
+# Version         : $Id: add-to-netprofile,v 1.2 2005/03/03 20:20:24 flepied Exp $
+# Author          : Frederic Lepied
+# Created On      : Thu Jun 24 07:26:46 2004
+# Purpose         : add a file under the control of netprofile
+#---------------------------------------------------------------
+
+TOP=${TOP=/etc/netprofile}
+FORCE=0
+
+if [ $# = 0 ]; then
+    echo "usage: `basename $0` [-f] <file> [<file>...]" 1>&2
+    exit 1
+fi
+
+if [ $1 = -f ]; then
+    FORCE=1
+    shift
+fi
+
+for f in "$@"; do
+    if [ ! -r $f ]; then
+	echo "$f doesn't exist" 1>&2
+	continue
+    elif ! grep -q "^$f$" "$TOP/list"; then
+	echo "$f" >> "$TOP/list"
+    fi
+    dir="`dirname $f`"
+    if [ $FORCE = 1 -o -z "`ls $TOP/profiles/*/files/$f 2> /dev/null`" ]; then
+	for d in "$TOP"/profiles/*/files; do
+	    mkdir -p "$d/$dir"
+	    cp -p "$f" "$d/$f"
+	done
+    else
+	echo "$f already under netprofile management" 1>&2
+    fi
+done
+
+# add-to-netprofile ends here

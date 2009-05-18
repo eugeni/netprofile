@@ -1,0 +1,23 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandriva Linux
+# Module          : netprofile
+# File            : netprofile.ifup
+# Version         : $Id: netprofile.ifup,v 1.1 2005/12/06 22:37:43 flepied Exp $
+# Author          : Frederic Lepied
+# Created On      : Mon Oct 10 19:08:41 2005
+# Purpose         : switch to a netprofile.
+#---------------------------------------------------------------
+
+if [ -r /etc/sysconfig/network-scripts/ifcfg-$1 ]; then
+
+    NETPROFILE=
+
+    . /etc/sysconfig/network-scripts/ifcfg-$1
+
+    if [ -n "$NETPROFILE" ]; then
+	set-netprofile -n "$NETPROFILE"
+    fi
+fi
+
+# netprofile.ifup ends here

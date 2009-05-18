@@ -1,0 +1,12 @@
+# netprofile completion
+# $Id: bash.completion,v 1.1 2003/08/07 20:51:02 flepied Exp $
+_netprofile()
+{
+	local cur
+
+	COMPREPLY=()
+	cur=${COMP_WORDS[COMP_CWORD]}
+
+	COMPREPLY=( $( command ls /etc/netprofile/profiles | grep "^$cur" ) )
+}
+complete -F _netprofile set-netprofile clone-netprofile save-netprofile

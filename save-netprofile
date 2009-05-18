@@ -1,0 +1,53 @@
+#!/bin/sh
+#---------------------------------------------------------------
+# Project         : Mandrakelinux
+# Module          : netprofile
+# File            : save-netprofile
+# Version         : $Id: save-netprofile,v 1.6 2004/06/23 23:33:32 flepied Exp $
+# Author          : Frederic Lepied
+# Created On      : Mon Mar 24 23:27:25 2003
+#---------------------------------------------------------------
+
+TOP=${TOP=/etc/netprofile}
+
+#DBG=-v
+
+saveprofile() {
+    FILES="$TOP/profiles/$PROFILE/files"
+    SERVICES="$TOP/profiles/$PROFILE/services"
+    
+    rm -rf "$TOP/profiles/$PROFILE/"
+
+    mkdir -p "$FILES" "$SERVICES"
+
+    while read w; do
+	for f in `ls $w 2> /dev/null`; do
+	    if [[ -r $f ]]; then
+		s="$FILES/$f"
+		basedir=`dirname "$s"`
+		mkdir $DBG -p "$basedir"
+		cp -p $DBG "$f" "$s" && [ -n "$1" ] && rm -f "$f"
+	    fi
+	done
+    done < $TOP/list
+
+    cd "$SERVICES"
+    touch `LC_ALL=C chkconfig --list | grep -v 'xinetd based services' | grep :on | cut -f1`
+}
+
+if [[ $# = 0 ]]; then
+    PROFILE=default
+
+    if [[ -r $TOP/current ]]; then
+	eval `cat $TOP/current`
+    fi
+elif [[ $# -ge 1 ]]; then
+    PROFILE="$1"
+else
+    echo "usage: `basename $0` [<profile>]" 1>&2
+    exit 1
+fi
+
+saveprofile "$2"
+
+# save-netprofile ends here
