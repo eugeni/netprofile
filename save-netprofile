@@ -14,11 +14,10 @@ TOP=${TOP=/etc/netprofile}
 
 saveprofile() {
     FILES="$TOP/profiles/$PROFILE/files"
-    SERVICES="$TOP/profiles/$PROFILE/services"
     
     rm -rf "$TOP/profiles/$PROFILE/"
 
-    mkdir -p "$FILES" "$SERVICES"
+    mkdir -p "$FILES"
 
     while read w; do
 	for f in `ls $w 2> /dev/null`; do
@@ -30,9 +29,6 @@ saveprofile() {
 	    fi
 	done
     done < $TOP/list
-
-    cd "$SERVICES"
-    touch `LC_ALL=C chkconfig --list | grep -v 'xinetd based services' | grep :on | cut -f1`
 }
 
 if [[ $# = 0 ]]; then
