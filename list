@@ -11,6 +11,7 @@
 /etc/profile.d/proxy.csh
 /etc/resolv.conf
 /etc/resolvconf/
+/etc/wpa_supplicant.conf
 /etc/sysconfig/network
 /etc/sysconfig/network-scripts/chat-*[0-9]
 /etc/sysconfig/network-scripts/ifcfg-*[0-9]
