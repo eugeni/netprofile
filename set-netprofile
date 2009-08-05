@@ -8,110 +8,144 @@
 # Created On      : Fri Mar 21 21:33:06 2003
 #---------------------------------------------------------------
 
-TOP=${TOP=/etc/netprofile}
+NETPROFILE=/etc/netprofile
+PROFILES=$NETPROFILE/profiles
+MODULES=$NETPROFILE/modules
+CURRENT=$NETPROFILE/current
+VERBOSE=1
 
-. /etc/sysconfig/network-scripts/network-functions
+function restore_files {
+        PROFILE=$1
+        MODULE=$2
+        FILES=$3
+        # restoring old files
+        SAVED_FILES="$PROFILES/$PROFILE/$MODULE.tar.gz"
+        echo "(cd / && test -e $SAVED_FILES && tar xpzf $SAVED_FILES)"
+}
 
-#DBG=-v
+function save_files {
+        PROFILE=$1
+        MODULE=$2
+        FILES=$3
+        # saving files
+        #SAVED_FILES="$PROFILES/$PROFILE/$MODULE.tar.gz"
+        SAVED_FILES="$PROFILE/$MODULE.tar.gz"
+        mkdir -p $PROFILE
+        #echo "(cd / && tar cpzf $SAVED_FILES \"$FILES\")"
+        tar cpzf $SAVED_FILES $(echo $FILES)
+}
+
+function restart_services {
+        SERVICES=$1
+        for service in $SERVICES; do
+                test -e /etc/init.d/$service && echo service $service restart
+        done
+}
+
+function print_debug {
+        if [ "a$VERBOSE" = "a1" ]; then
+                echo "$*"
+        fi
+}
+
+function restore_profile {
+        # sets a network profile
+        PROFILE=$1
+        CURPROFILE=$(cat $CURRENT)
+        if [ "a$PROFILE" = "a$CURPROFILE" ]; then
+                echo "The profile $PROFILE profile is already active."
+                return 1
+        fi
+        for module in $MODULES/*; do
+                # if module is not executable, disable it
+                test -x $module || continue
+                . $module
+                print_debug "Restoring files for $NAME"
+                restore_files "$PROFILE" "$NAME" "$FILES"
+                print_debug "Restarting services for $NAME"
+                restart_services "$SERVICES"
+                restore $PROFILE
+        done
+        # mark current profile as restored
+        echo $PROFILE > $CURRENT
+}
+
+function save_profile {
+        # saves current system settings into a profile
+        PROFILE=$1
+        for module in $MODULES/*; do
+                # if module is not executable, disable it
+                test -x $module || continue
+                . $module
+                print_debug "Saving files for $NAME"
+                save_files "$PROFILE" "$NAME" "$FILES"
+                save $PROFILE
+        done
+}
 
 NO_RESTART_NETWORK=
 
-# assume cwd is /etc/init.d
-stop() {
-}
-
-# assume cwd is /etc/init.d
-start() {
-    for s in $2; do
-	[[ -x "$s" ]] || continue
-	[[ -e /var/lock/subsys/"$s" ]] && continue
-	grep -q chkconfig $s || continue
-	echo $(egrep -a '^#.*chkconfig: ' $s|awk '{print $4}') $s
-    done | sort -n | cut -d" " -f2    
-}
-
-restoreprofile() {
-    while read w; do
-	for s in `ls $FILES/$w 2> /dev/null`; do
-	    if [[ -r $s ]]; then
-		f=$(echo $s | sed "s@$FILES@@")
-		mkdir $DBG -p `dirname $f`
-		cp $DBG -p "$s" "$f"
-	    fi
-	done
-    done < $TOP/list
-
-    unset HOSTNAME
-    [[ -r /etc/sysconfig/network ]] && . /etc/sysconfig/network
-    [[ -n "$HOSTNAME" ]] && set_hostname $HOSTNAME
-}
-
-if [ "$1" = '-n' ]; then
-    NO_RESTART_NETWORK=1
-    shift
-fi
-
-if [[ $# -gt 1 ]]; then
-    echo "usage: `basename $0` [-n] <profile>" 1>&2
-    exit 1
-fi
-
-NEWPROFILE="$1"
-
+# {{{ boot selection
 if [[ -z "$NEWPROFILE" ]]; then
     # Check the kernel command line, profile are selectable
     # right from the boot manager
     eval `cat /proc/cmdline | tr ' ' '\n' | grep PROFILE`
     NEWPROFILE="$PROFILE"
     if [[ -z "$NEWPROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
-	nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
-	if [[ "$nb_profiles" == "1" ]]; then
-	    NEWPROFILE=`basename /etc/netprofile/profiles/*`
-	else 
-	    _procsplash="`cat /proc/splash 2>/dev/null`"
-	    grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
-	    if [ -z "$_silent" -o ! -r /proc/splash -o -z "`echo $_procsplash|grep on`" ]; then
-		if [[ -x /usr/bin/fbgrab ]]; then
-		    rm -f /tmp/bootsplash.png
-		    /usr/bin/fbgrab /tmp/bootsplash.png
-		fi
-	    else
-		if [[ -z $res ]]; then 
-		    res=`fbresolution`
-		fi
-		if [[ -f /etc/sysconfig/bootsplash ]]; then
-		    . /etc/sysconfig/bootsplash
-		    theme=$THEME
-		    if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
-			function box() { true; }
-			. /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
-		    fi
-		fi
-		if [[ -f $silentjpeg ]]; then
-		    rm -f /tmp/bootsplash.png
-		    cp -f $silentjpeg /tmp/bootsplash.png
-		fi
-	    fi
+        nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
+        if [[ "$nb_profiles" == "1" ]]; then
+            NEWPROFILE=`basename /etc/netprofile/profiles/*`
+        else 
+            _procsplash="`cat /proc/splash 2>/dev/null`"
+            grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
+            if [ -z "$_silent" -o ! -r /proc/splash -o -z "`echo $_procsplash|grep on`" ]; then
+                if [[ -x /usr/bin/fbgrab ]]; then
+                    rm -f /tmp/bootsplash.png
+                    /usr/bin/fbgrab /tmp/bootsplash.png
+                fi
+            else
+                if [[ -z $res ]]; then 
+                    res=`fbresolution`
+                fi
+                if [[ -f /etc/sysconfig/bootsplash ]]; then
+                    . /etc/sysconfig/bootsplash
+                    theme=$THEME
+                    if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+                        function box() { true; }
+                        . /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+                    fi
+                fi
+                if [[ -f $silentjpeg ]]; then
+                    rm -f /tmp/bootsplash.png
+                    cp -f $silentjpeg /tmp/bootsplash.png
+                fi
+            fi
 
-	    if [[ -r $TOP/current ]]; then
-		eval `cat $TOP/current`
-	    fi
-	    pushd  /etc/netprofile/profiles/
-	    if [[ -n "$PROFILE" ]]; then 
-		eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" "$PROFILE" * | grep RESULT`
-	    else 
-		eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" * | grep RESULT`
-	    fi
-	    if [[ "$_silent" == "yes" ]]; then
-		if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
-		    /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
-		fi
-	    fi
-	    NEWPROFILE="$RESULT"
-	    popd
-	fi
+            if [[ -r $TOP/current ]]; then
+                eval `cat $TOP/current`
+            fi
+            pushd  /etc/netprofile/profiles/
+            if [[ -n "$PROFILE" ]]; then 
+                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" "$PROFILE" * | grep RESULT`
+            else 
+                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" * | grep RESULT`
+            fi
+            if [[ "$_silent" == "yes" ]]; then
+                if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+                    /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+                fi
+            fi
+            NEWPROFILE="$RESULT"
+            popd
+        fi
     fi
 fi
+# }}}
+
+restore_profile default
+save_profile default
+
+exit 0
 
 PROFILE=default
 

@@ -16,7 +16,7 @@ if [ -r /etc/sysconfig/network-scripts/ifcfg-$1 ]; then
     . /etc/sysconfig/network-scripts/ifcfg-$1
 
     if [ -n "$NETPROFILE" ]; then
-	set-netprofile -n "$NETPROFILE"
+        set-netprofile -n "$NETPROFILE"
     fi
 fi
 

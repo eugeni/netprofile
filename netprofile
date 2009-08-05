@@ -16,28 +16,28 @@
 
 case $1 in
 start)
-	if [ -z "$PROFILE" ] ; then
-	    # Check the kernel command line, profile are selectable
-	    # right from the boot manager
-	    eval `cat /proc/cmdline | tr ' ' '\n' | grep PROFILE`
-	fi
-	if [ -n "$PROFILE" ] ; then
-	    set-netprofile $PROFILE
-	fi
-	touch /var/lock/subsys/netprofile
-	;;
+        if [ -z "$PROFILE" ] ; then
+            # Check the kernel command line, profile are selectable
+            # right from the boot manager
+            eval `cat /proc/cmdline | tr ' ' '\n' | grep PROFILE`
+        fi
+        if [ -n "$PROFILE" ] ; then
+            set-netprofile $PROFILE
+        fi
+        touch /var/lock/subsys/netprofile
+        ;;
 stop)
-	rm -f /var/lock/subsys/netprofile
-	;;
+        rm -f /var/lock/subsys/netprofile
+        ;;
 restart)
-	$0 stop
-	$0 start
-	;;
+        $0 stop
+        $0 start
+        ;;
 status|reload)
-	;;
+        ;;
 *)
-	echo "start|stop|restart|status"
-	;;
+        echo "start|stop|restart|status"
+        ;;
 esac
 
 # netprofile ends here
