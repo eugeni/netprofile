@@ -147,34 +147,9 @@ save_profile default
 
 exit 0
 
-PROFILE=default
-
-if [[ -r $TOP/current ]]; then
-    eval `cat $TOP/current`
-fi
-
-if [[ "$NEWPROFILE" == "$PROFILE" || -z "$NEWPROFILE" ]]; then
-    exit 0
-fi
-
-if [[ ! -d $TOP/profiles/"$NEWPROFILE"/files ]]; then
-    echo "`basename $0`: unknown profile $NEWPROFILE" 1>&2
-    exit 1
-fi
-
-save-netprofile "$PROFILE" 1
-
-FILES="$TOP/profiles/$NEWPROFILE/files"
-
-restoreprofile
-
-echo "PROFILE=\"$NEWPROFILE\"" > $TOP/current
-
 # make net_applet reload the configuration
 # (needs "current" file to be up to date)
 PID=`pidof -x net_applet`
 [[ -n "$PID" ]] && kill -HUP $PID
-
-:
 
 # set-netprofile ends here
