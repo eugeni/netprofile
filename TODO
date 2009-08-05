@@ -1,4 +1,3 @@
- o manage files under rcs or cvs.
+TODO
 
- o have a way to copy files in all profiles when we first install
- packages having files under netprofile control.
+- Perform netprofile operations atomically.

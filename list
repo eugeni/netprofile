@@ -19,3 +19,4 @@
 /etc/sysconfig/network-scripts/wireless.d/
 /etc/sysconfig/network-scripts/vpn.d/
 /var/lib/dhcp/*leases
+/etc/urpmi/proxy.conf
