@@ -1,0 +1,29 @@
+# netprofile module
+#
+# this module contains settings for saving/restore the network configuration
+# in different network profiles
+
+NAME="firewall6"
+DESCRIPTION="Save/restore firewall settings (IPv6)"
+
+# list of files to be saved by netprofile
+FILES="/etc/sysconfig/ip6tables
+/etc/shorewall6/
+/etc/ifw"
+
+# list of services to be restarted by netprofile
+SERVICES="ip6tables
+mandi
+shorewall6"
+
+# special actions to perform after saving profile
+function save {
+	PROFILE=$1
+	echo "$NAME: Profile $PROFILE saved"
+}
+
+# special actions to perform after setting a profile
+function restore {
+	PROFILE=$1
+	echo "$NAME: Profile $PROFILE restored"
+}
