@@ -20,3 +20,7 @@
 /etc/sysconfig/network-scripts/vpn.d/
 /var/lib/dhcp/*leases
 /etc/urpmi/proxy.conf
+/etc/shorewall/rules.drakx
+/etc/ifw/rules
+/etc/ifw/whitelist
+/etc/ifw/rules.d/
