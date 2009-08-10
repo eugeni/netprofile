@@ -77,6 +77,13 @@ function catlog {
 function restore_profile {
         # sets a network profile
         PROFILE=$1
+        # do we have a profile?
+        if [ ! -d "$PROFILES/$PROFILE" ]; then
+                log "Profile $PROFILE does not exists"
+                return 1
+        else
+                log "Restoring profile $PROFILE from $PROFILES/$PROFILE"
+        fi
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
@@ -94,18 +101,86 @@ function restore_profile {
 function save_profile {
         # saves current system settings into a profile
         PROFILE=$1
-        test -d "$PROFILE" || mkdir -p "$PROFILE"
+        test -d "$PROFILES/$PROFILE" || mkdir -p "$PROFILES/$PROFILE"
+        log "Saving files for $PROFILE"
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
                 . $module
-                print_debug "Saving files for $NAME"
                 save_files "$PROFILE" "$NAME" "$FILES"
+                # calling module-specific hook
                 save "$PROFILE"
         done
 }
 
+function remove_profile {
+        # removes a network profile
+        PROFILE=$1
+        # do we have a profile?
+        if [ ! -d "$PROFILES/$PROFILE" ]; then
+                log "Profile $PROFILE does not exists"
+                return 1
+        else
+                log "Removing profile $PROFILE from $PROFILES/$PROFILE"
+        fi
+        # TODO: save backup
+        rm -rf "$PROFILES/$PROFILE"
+}
+
 NO_RESTART_NETWORK=
+
+# must be run as root
+if [ ! "a$UID" = "a0" ]; then
+        echo "Error: $0 must be run as root!"
+        exit 1
+fi
+
+if [ "a$2" = "a" ]; then
+        cat << EOF
+Usage: $0 <switch|update|delete> <profile>
+
+The switch operation will save the system configuration into current profile,
+and restore files belonging to the new profile.  If the new profile does not
+exists, it will be created with base on current configuration.
+
+EOF
+        exit 1
+fi
+
+ACTION="$1"
+NEW_PROFILE="$2"
+
+CURPROFILE=$(cat $CURRENT)
+if [ "a$NEW_PROFILE" = "a$CURPROFILE" ]; then
+        echo "The $NEW_PROFILE is the current profile."
+        exit 1
+fi
+
+if [ "a$ACTION" = "aswitch" ]; then
+        log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
+        save_profile "$CURPROFILE"
+        restore_profile "$NEW_PROFILE" || save_profile "$NEW_PROFILE"
+elif [ "a$ACTION" = "adelete" ]; then
+        print_debug "Removing profile $NEW_PROFILE"
+        remove_profile "$NEW_PROFILE"
+else
+        echo "$0: unknown action $ACTION"
+        exit 1
+fi
+
+exit 0
+
+restore_profile default
+save_profile default
+
+exit 0
+
+# make net_applet reload the configuration
+# (needs "current" file to be up to date)
+PID=`pidof -x net_applet`
+[[ -n "$PID" ]] && kill -HUP $PID
+
+# set-netprofile ends here
 
 # {{{ boot selection
 if [[ -z "$NEWPROFILE" ]]; then
@@ -164,52 +239,3 @@ if [[ -z "$NEWPROFILE" ]]; then
 fi
 # }}}
 
-# must be run as root
-if [ ! "a$UID" = "a0" ]; then
-        echo "Error: $0 must be run as root!"
-        exit 1
-fi
-
-if [ "a$2" = "a" ]; then
-        cat << EOF
-Usage: $0 <switch|update|delete> <profile>
-
-The switch operation will save the system configuration into current profile,
-and restore files belonging to the new profile.  If the new profile does not
-exists, it will be created with base on current configuration.
-
-EOF
-        exit 1
-fi
-
-ACTION="$1"
-PROFILE="$2"
-
-CURPROFILE=$(cat $CURRENT)
-if [ "a$PROFILE" = "a$CURPROFILE" ]; then
-        echo "The $PROFILE is the current profile."
-        exit 1
-fi
-
-if [ "a$ACTION" = "aswitch" ]; then
-        print_debug "Switching from profile $CURPROFILE to profile $PROFILE"
-elif [ "a$ACTION" = "adelete" ]; then
-        print_debug "Removing profile $PROFILE"
-else
-        echo "$0: unknown action $ACTION"
-        exit 1
-fi
-
-exit 0
-
-restore_profile default
-save_profile default
-
-exit 0
-
-# make net_applet reload the configuration
-# (needs "current" file to be up to date)
-PID=`pidof -x net_applet`
-[[ -n "$PID" ]] && kill -HUP $PID
-
-# set-netprofile ends here
