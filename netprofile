@@ -131,17 +131,29 @@ function remove_profile {
         rm -rf "$PROFILES/$PROFILE"
 }
 
-NO_RESTART_NETWORK=
+function check_root {
+        # must be run as root
+        if [ ! "a$UID" = "a0" ]; then
+                echo "Error: $0 must be run as root!"
+                exit 1
+        fi
+}
 
-# must be run as root
-if [ ! "a$UID" = "a0" ]; then
-        echo "Error: $0 must be run as root!"
-        exit 1
-fi
+function check_current_profile {
+        if [ -z "$NEW_PROFILE" ]; then
+                usage
+                exit 1
+        fi
 
-if [ "a$2" = "a" ]; then
+        if [ "a$NEW_PROFILE" = "a$CURPROFILE" ]; then
+                echo "The $NEW_PROFILE is the current profile."
+                exit 1
+        fi
+}
+
+function usage {
         cat << EOF
-Usage: $0 <switch|current|delete> <profile>
+Usage: $0 <switch|current|delete> [profile]
 
 The switch operation will save the system configuration into current profile,
 and restore files belonging to the new profile.  If the new profile does not
@@ -150,6 +162,12 @@ exists, it will be created with base on current configuration.
 The current operation will print the currently used profile.
 
 EOF
+}
+
+NO_RESTART_NETWORK=
+
+if [ "a$1" = "a" ]; then
+        usage
         exit 1
 fi
 
@@ -157,16 +175,15 @@ ACTION="$1"
 NEW_PROFILE="$2"
 
 CURPROFILE=$(cat $CURRENT)
-if [ "a$NEW_PROFILE" = "a$CURPROFILE" ]; then
-        echo "The $NEW_PROFILE is the current profile."
-        exit 1
-fi
-
 if [ "a$ACTION" = "aswitch" ]; then
+        check_root
+        check_current_profile
         log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
         save_profile "$CURPROFILE"
         restore_profile "$NEW_PROFILE" || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
 elif [ "a$ACTION" = "adelete" ]; then
+        check_root
+        check_current_profile
         print_debug "Removing profile $NEW_PROFILE"
         remove_profile "$NEW_PROFILE"
 elif [ "a$ACTION" = "acurrent" ]; then
