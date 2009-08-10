@@ -32,7 +32,10 @@ function restore_files {
         FILES=$3
         # restoring old files
         SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
-        echo "(cd $SAVED_FILE && tar cpf -) | (cd / && tar xpf -)"
+        log "restoring files for $MODULE from $SAVED_FILES"
+        rm -f $LOG_TMP
+        (cd $SAVED_FILES && tar cpf - . 2>>$LOG_TMP) | (cd / && tar xpf - 2>>$LOG_TMP)
+        catlog
 }
 
 function save_files {
