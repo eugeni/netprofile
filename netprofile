@@ -38,6 +38,16 @@ function restore_files {
         catlog
 }
 
+function remove_files {
+        PROFILE=$1
+        MODULE=$2
+        FILES=$3
+        log " ** removing files to restore $MODULE from $PROFILE"
+        rm -f $LOG_TMP
+        rm -rf -- $(echo $FILES) 2>>$LOG_TMP
+        catlog
+}
+
 function save_files {
         PROFILE=$1
         MODULE=$2
@@ -95,6 +105,8 @@ function restore_profile {
                 # if module is not executable, disable it
                 test -x $module || continue
                 . $module
+                print_debug "Removing old files for $NAME"
+                remove_files "$PROFILE" "$NAME" "$FILES"
                 print_debug "Restoring files for $NAME"
                 restore_files "$PROFILE" "$NAME" "$FILES"
                 print_debug "Restarting services for $NAME"
