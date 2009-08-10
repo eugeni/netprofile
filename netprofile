@@ -32,7 +32,7 @@ function restore_files {
         FILES=$3
         # restoring old files
         SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
-        log "restoring files for $MODULE from $SAVED_FILES"
+        log " ** restoring files for $MODULE from $SAVED_FILES"
         rm -f $LOG_TMP
         (cd $SAVED_FILES && tar cpf - . 2>>$LOG_TMP) | (cd / && tar xpf - 2>>$LOG_TMP)
         catlog
@@ -48,7 +48,7 @@ function save_files {
                 log "creating profile directory: $SAVED_FILES"
                 mkdir -p $SAVED_FILES
         fi
-        log "copying files for $MODULE into $SAVED_FILES"
+        log " ** copying files for $MODULE into $SAVED_FILES"
         rm -f $LOG_TMP
         tar cpf - $(echo $FILES) 2>>$LOG_TMP | (cd $SAVED_FILES && tar xpf -) 2>>$LOG_TMP
         catlog
@@ -57,9 +57,9 @@ function save_files {
 function restart_services {
         SERVICES=$1
         for service in $SERVICES; do
-                log "restarting service $service"
+                log " ** restarting service $service"
                 rm -f $LOG_TMP
-                test -e /etc/init.d/$service && echo service $service restart 2>>$LOG_TMP
+                test -e /etc/init.d/$service && service $service restart 2>>$LOG_TMP
                 catlog
         done
 }

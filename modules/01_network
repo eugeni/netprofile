@@ -29,7 +29,8 @@ FILES="/etc/hosts
 
 # list of services to be restarted by netprofile
 SERVICES="resolvconf
-network"
+network
+mandi"
 
 # special actions to perform after saving profile
 function save {

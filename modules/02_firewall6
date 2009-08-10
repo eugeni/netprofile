@@ -13,7 +13,6 @@ FILES="/etc/sysconfig/ip6tables
 
 # list of services to be restarted by netprofile
 SERVICES="ip6tables
-mandi
 shorewall6"
 
 # special actions to perform after saving profile
