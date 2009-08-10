@@ -39,8 +39,10 @@ function save_files {
         FILES=$3
         # saving files
         SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
-        log "creating profile directory: $SAVED_FILES"
-        test -d "$SAVED_FILES" || mkdir -p $SAVED_FILES
+        if [ ! -d "$SAVED_FILES" ]; then
+                log "creating profile directory: $SAVED_FILES"
+                mkdir -p $SAVED_FILES
+        fi
         log "copying files for $MODULE into $SAVED_FILES"
         rm -f $LOG_TMP
         tar cpf - $(echo $FILES) 2>>$LOG_TMP | (cd $SAVED_FILES && tar xpf -) 2>>$LOG_TMP
@@ -159,7 +161,7 @@ fi
 if [ "a$ACTION" = "aswitch" ]; then
         log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
         save_profile "$CURPROFILE"
-        restore_profile "$NEW_PROFILE" || save_profile "$NEW_PROFILE"
+        restore_profile "$NEW_PROFILE" || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
 elif [ "a$ACTION" = "adelete" ]; then
         print_debug "Removing profile $NEW_PROFILE"
         remove_profile "$NEW_PROFILE"
