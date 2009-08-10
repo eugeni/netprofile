@@ -1,18 +1,28 @@
 #!/bin/bash
-#---------------------------------------------------------------
-# Project         : Mandriva Linux
-# Module          : netprofile
-# File            : set-netprofile
-# Version         : $Id: set-netprofile,v 1.20 2005/12/06 22:02:14 flepied Exp $
-# Author          : Frederic Lepied
-# Created On      : Fri Mar 21 21:33:06 2003
-#---------------------------------------------------------------
+#
+# This is netprofile, an application which allows to use
+# different sets of network profiles on same physical network connections.
+#
+# Copyright, (C) Mandriva, 2003-2009.
+# Copyright, (C) Frederic Lepied, 2003-2005
+# Copyright, (C) Eugeni Dodonov, 2009
+#
+# TODO: security concerns (profiles containing '/', ';' or '..')
 
 NETPROFILE=/etc/netprofile
 PROFILES=$NETPROFILE/profiles
 MODULES=$NETPROFILE/modules
 CURRENT=$NETPROFILE/current
 VERBOSE=1
+LOG=/var/log/netprofile.log
+DATE=$(date)
+LOG_TMP=$(mktemp)
+
+function cleanup {
+        rm -f $LOG_TMP
+}
+trap cleanup 0
+# TODO: handle other signals gracefully
 
 function restore_files {
         PROFILE=$1
@@ -28,17 +38,22 @@ function save_files {
         MODULE=$2
         FILES=$3
         # saving files
-        #SAVED_FILES="$PROFILES/$PROFILE/$MODULE.tar.gz"
-        SAVED_FILES="$PROFILE/$MODULE.tar.gz"
-        mkdir -p $PROFILE
-        #echo "(cd / && tar cpzf $SAVED_FILES \"$FILES\")"
-        tar cpzf $SAVED_FILES $(echo $FILES)
+        SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
+        log "creating profile directory: $SAVED_FILES"
+        test -d "$SAVED_FILES" || mkdir -p $SAVED_FILES
+        log "copying files for $MODULE into $SAVED_FILES"
+        rm -f $LOG_TMP
+        tar cpf - $(echo $FILES) 2>>$LOG_TMP | (cd $SAVED_FILES && tar xpf -) 2>>$LOG_TMP
+        catlog
 }
 
 function restart_services {
         SERVICES=$1
         for service in $SERVICES; do
-                test -e /etc/init.d/$service && echo service $service restart
+                log "restarting service $service"
+                rm -f $LOG_TMP
+                test -e /etc/init.d/$service && echo service $service restart 2>>$LOG_TMP
+                catlog
         done
 }
 
@@ -48,14 +63,20 @@ function print_debug {
         fi
 }
 
+function log {
+        print_debug "$1"
+        echo "$DATE: $1" >> $LOG
+}
+
+function catlog {
+        while read line; do
+                echo "$DATE: $line" >> $LOG
+        done < $LOG_TMP
+}
+
 function restore_profile {
         # sets a network profile
         PROFILE=$1
-        CURPROFILE=$(cat $CURRENT)
-        if [ "a$PROFILE" = "a$CURPROFILE" ]; then
-                echo "The profile $PROFILE profile is already active."
-                return 1
-        fi
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
@@ -64,22 +85,23 @@ function restore_profile {
                 restore_files "$PROFILE" "$NAME" "$FILES"
                 print_debug "Restarting services for $NAME"
                 restart_services "$SERVICES"
-                restore $PROFILE
+                restore "$PROFILE"
         done
         # mark current profile as restored
-        echo $PROFILE > $CURRENT
+        echo "$PROFILE" > $CURRENT
 }
 
 function save_profile {
         # saves current system settings into a profile
         PROFILE=$1
+        test -d "$PROFILE" || mkdir -p "$PROFILE"
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
                 . $module
                 print_debug "Saving files for $NAME"
                 save_files "$PROFILE" "$NAME" "$FILES"
-                save $PROFILE
+                save "$PROFILE"
         done
 }
 
@@ -141,6 +163,44 @@ if [[ -z "$NEWPROFILE" ]]; then
     fi
 fi
 # }}}
+
+# must be run as root
+if [ ! "a$UID" = "a0" ]; then
+        echo "Error: $0 must be run as root!"
+        exit 1
+fi
+
+if [ "a$2" = "a" ]; then
+        cat << EOF
+Usage: $0 <switch|update|delete> <profile>
+
+The switch operation will save the system configuration into current profile,
+and restore files belonging to the new profile.  If the new profile does not
+exists, it will be created with base on current configuration.
+
+EOF
+        exit 1
+fi
+
+ACTION="$1"
+PROFILE="$2"
+
+CURPROFILE=$(cat $CURRENT)
+if [ "a$PROFILE" = "a$CURPROFILE" ]; then
+        echo "The $PROFILE is the current profile."
+        exit 1
+fi
+
+if [ "a$ACTION" = "aswitch" ]; then
+        print_debug "Switching from profile $CURPROFILE to profile $PROFILE"
+elif [ "a$ACTION" = "adelete" ]; then
+        print_debug "Removing profile $PROFILE"
+else
+        echo "$0: unknown action $ACTION"
+        exit 1
+fi
+
+exit 0
 
 restore_profile default
 save_profile default
