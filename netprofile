@@ -156,7 +156,12 @@ function check_root {
 
 function check_current_profile {
         if [ -z "$NEW_PROFILE" ]; then
-                usage
+                # get profile name from cmdline
+                NEWPROFILE=$(cat /proc/cmdline | tr ' ' '\n' | grep PROFILE | cut -f 2 -d =)
+        fi
+
+        if [ -z "$NEW_PROFILE" ]; then
+                echo "Error: no profile specified, and no profile selected on boot. Aborting."
                 exit 1
         fi
 
@@ -166,13 +171,22 @@ function check_current_profile {
         fi
 }
 
+function reload_netapplet {
+        # make net_applet reload the configuration
+        # (needs "current" file to be up to date)
+        PID=`pidof -x net_applet`
+        [[ -n "$PID" ]] && kill -HUP $PID
+}
+
 function usage {
         cat << EOF
 Usage: $0 <switch|current|list|delete> [profile]
 
 The switch operation will save the system configuration into current profile,
 and restore files belonging to the new profile.  If the new profile does not
-exists, it will be created with base on current configuration.
+exists, it will be created with base on current configuration. If no profile is
+given, netprofile will attempt to determine the profile from the kernel command
+line.
 
 The current operation will print the currently used profile.
 
@@ -198,6 +212,7 @@ if [ "a$ACTION" = "aswitch" ]; then
         log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
         save_profile "$CURPROFILE"
         restore_profile "$NEW_PROFILE" || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
+        reload_netapplet
 elif [ "a$ACTION" = "adelete" ]; then
         check_root
         check_current_profile
@@ -221,11 +236,6 @@ restore_profile default
 save_profile default
 
 exit 0
-
-# make net_applet reload the configuration
-# (needs "current" file to be up to date)
-PID=`pidof -x net_applet`
-[[ -n "$PID" ]] && kill -HUP $PID
 
 # set-netprofile ends here
 
