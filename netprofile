@@ -8,6 +8,8 @@
 # Copyright, (C) Eugeni Dodonov, 2009
 #
 # TODO: security concerns (profiles containing '/', ';' or '..')
+# TODO: implement check command (to check for changes in profile)
+# TODO: implement getopt support
 
 NETPROFILE=/etc/netprofile
 PROFILES=$NETPROFILE/profiles
@@ -139,11 +141,13 @@ fi
 
 if [ "a$2" = "a" ]; then
         cat << EOF
-Usage: $0 <switch|update|delete> <profile>
+Usage: $0 <switch|current|delete> <profile>
 
 The switch operation will save the system configuration into current profile,
 and restore files belonging to the new profile.  If the new profile does not
 exists, it will be created with base on current configuration.
+
+The current operation will print the currently used profile.
 
 EOF
         exit 1
@@ -165,6 +169,9 @@ if [ "a$ACTION" = "aswitch" ]; then
 elif [ "a$ACTION" = "adelete" ]; then
         print_debug "Removing profile $NEW_PROFILE"
         remove_profile "$NEW_PROFILE"
+elif [ "a$ACTION" = "acurrent" ]; then
+        echo $CURPROFILE
+        exit 0
 else
         echo "$0: unknown action $ACTION"
         exit 1
