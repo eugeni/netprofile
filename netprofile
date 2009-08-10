@@ -31,8 +31,8 @@ function restore_files {
         MODULE=$2
         FILES=$3
         # restoring old files
-        SAVED_FILES="$PROFILES/$PROFILE/$MODULE.tar.gz"
-        echo "(cd / && test -e $SAVED_FILES && tar xpzf $SAVED_FILES)"
+        SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
+        echo "(cd $SAVED_FILE && tar cpf -) | (cd / && tar xpf -)"
 }
 
 function save_files {
