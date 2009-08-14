@@ -78,7 +78,7 @@ function restart_services {
         for service in $SERVICES; do
                 log " ** restarting service $service"
                 rm -f $LOG_TMP
-                test -e /etc/init.d/$service && service $service restart 2>>$LOG_TMP
+                chkconfig $service && service $service restart 2>>$LOG_TMP
                 catlog
         done
 }
