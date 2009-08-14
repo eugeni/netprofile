@@ -95,9 +95,11 @@ function log {
 }
 
 function catlog {
-        while read line; do
-                echo "$DATE: $line" >> $LOG
-        done < $LOG_TMP
+        if [ -s $LOG_TMP ]; then
+                while read line; do
+                        echo "$DATE: $line" >> $LOG
+                done < $LOG_TMP
+        fi
 }
 
 function restore_profile {

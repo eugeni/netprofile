@@ -1,4 +1,6 @@
-- added urpmi module
+ - only restart services if they are enabled
+ - only remove files from system configuration if they were saved by new profile
+ - added urpmi module
 
 0.20:
  - rewritten netprofile to use a single main executable file and action-based commands
