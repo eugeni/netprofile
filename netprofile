@@ -312,7 +312,18 @@ elif [ "a$ACTION" = "acurrent" ]; then
         exit 0
 elif [ "a$ACTION" = "alist" ]; then
         # shows available netprofiles
-        (cd $PROFILES && echo *)
+        AVAILABLE_PROFILES=""
+        (
+                cd $PROFILES
+                for z in *; do
+                        if [ "$z" = "$CURPROFILE" ]; then
+                                AVAILABLE_PROFILES="$AVAILABLE_PROFILES [$z]"
+                        else
+                                AVAILABLE_PROFILES="$AVAILABLE_PROFILES $z"
+                        fi
+                done
+                echo $AVAILABLE_PROFILES
+        )
         exit 0
 else
         echo "$0: unknown action $ACTION"
