@@ -291,9 +291,4 @@ fi
 
 exit 0
 
-restore_profile default
-save_profile default
-
-exit 0
-
 # set-netprofile ends here
