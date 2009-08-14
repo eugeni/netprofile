@@ -175,13 +175,13 @@ function check_current_profile {
 function get_boot_profile {
         if [ -z "$NEW_PROFILE" ]; then
                 # get profile name from cmdline
-                NEWPROFILE=$(cat /proc/cmdline | tr ' ' '\n' | grep PROFILE | cut -f 2 -d =)
+                NEW_PROFILE=$(cat /proc/cmdline | tr ' ' '\n' | grep PROFILE | cut -f 2 -d =)
         fi
         # no profile passed on command line, show user a menu
-        if [[ -z "$NEWPROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
+        if [[ -z "$NEW_PROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
                 nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
                 if [[ "$nb_profiles" == "1" ]]; then
-                        NEWPROFILE=`basename /etc/netprofile/profiles/*`
+                        NEW_PROFILE=`basename /etc/netprofile/profiles/*`
                 else 
                         _procsplash="`cat /proc/splash 2>/dev/null`"
                         grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
@@ -210,7 +210,7 @@ function get_boot_profile {
 
                         pushd  /etc/netprofile/profiles/
                         if [[ -n "$CURPROFILE" ]]; then 
-                                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a network profile" "$PROFILE" * | grep RESULT`
+                                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a network profile" "$CURPROFILE" * | grep RESULT`
                         else
                                 eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a network profile" * | grep RESULT`
                         fi
@@ -219,7 +219,7 @@ function get_boot_profile {
                                         /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
                                 fi
                         fi
-                        NEWPROFILE="$RESULT"
+                        NEW_PROFILE="$RESULT"
                         popd
                 fi
         fi
