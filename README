@@ -1,0 +1,44 @@
+This is NetProfile, a Mandriva tool to support different network profiles.
+
+The idea of this application is quite simple. For different network
+environments one requires different network settings. For example, you may
+use a fixed IP at home, with firewall disabled, and no proxy. At work, you
+must use a corporate proxy and a DHCP address for your ethernet connection.
+And while at a LAN house or Internet cafe, a full-featured firewall must be
+used, ethernet connection disabled and a tor proxy (for example) to be in
+effect.
+
+How to achieve this in a working system? Usually you must manually
+reconfigure the network settings, edit configuration files for network,
+firewall and proxy, and so on. And this is where netprofile comes into
+action.
+
+The netprofile uses the concept of network profiles to represent different
+network environments. You start with the 'default' profile, and you may use
+your system normally. If you want to setup a different network environment,
+you may 'switch' to a different profile (a new profile will be created if
+necessary). Your current settings will be saved to your previous profile,
+and all changes to system configuration will now apply to your new profile.
+
+To illustrate:
+
+ - You configure your system to use fixed IP address and a specific firewall
+   configuration.
+ - You go to work, where different network environment takes place. You
+   switch to the work profile ('netprofile switch work', or using net_applet
+   gui), and if it is the first time you use this profile, it is created
+   with base on your current settings.
+ - You configure your network card to use DHCP, configure your
+   corporate-specific proxy and firewall settings, and continue using your
+   machine normally.
+ - When you come back home, you switch the profile back to default, and your
+   previous settings are restored.
+
+You may also specify what network profile to use on boot, by passing the
+'PROFILE=<profile name>' option to the boot loader. If you have multiple
+profiles, and no boot parameter was specified, a menu dialog will appear on
+boot asking you to select the profile to use.
+
+That's it!
+
+Have fun!
