@@ -9,4 +9,4 @@ _netprofile()
 
 	COMPREPLY=( $( command ls /etc/netprofile/profiles | grep "^$cur" ) )
 }
-complete -F _netprofile set-netprofile clone-netprofile save-netprofile
+complete -F _netprofile set-netprofile
