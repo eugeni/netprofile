@@ -1,5 +1,8 @@
 This is NetProfile, a Mandriva tool to support different network profiles.
 
+Introduction
+------------
+
 The idea of this application is quite simple. For different network
 environments one requires different network settings. For example, you may
 use a fixed IP at home, with firewall disabled, and no proxy. At work, you
@@ -20,7 +23,11 @@ you may 'switch' to a different profile (a new profile will be created if
 necessary). Your current settings will be saved to your previous profile,
 and all changes to system configuration will now apply to your new profile.
 
-To illustrate:
+
+Sample use case
+---------------
+
+To illustrate netprofile functionality, consider this example:
 
  - You configure your system to use fixed IP address and a specific firewall
    configuration.
@@ -34,10 +41,41 @@ To illustrate:
  - When you come back home, you switch the profile back to default, and your
    previous settings are restored.
 
+Boot-time profile selection
+---------------------------
+
 You may also specify what network profile to use on boot, by passing the
 'PROFILE=<profile name>' option to the boot loader. If you have multiple
 profiles, and no boot parameter was specified, a menu dialog will appear on
 boot asking you to select the profile to use.
+
+Netprofile modules
+------------------
+
+Netprofile supports different modules, which provide most of its
+configuration. In its current version, the following modules are provided:
+ - network
+   - This module is responsible for saving/restoring the network settings,
+     such as the IP address, routes, gateways and connection-specific
+     parameters (wifi parameters and password, dialup connections, and so
+     on)
+ - firewall
+   - This module is responsible for firewall configuration (namely iptables
+     and shorewall firewalls)
+ - firewall6
+   - This module is responsible for firewall configuration for IPv6 networks
+ - proxy
+   - This module is responsible for system-wide proxy configurations
+ - urpmi
+   - This module is responsible for saving/restoring system urpmi
+     configuration.
+
+Known bugs and limitations
+--------------------------
+
+None yet.
+
+
 
 That's it!
 
