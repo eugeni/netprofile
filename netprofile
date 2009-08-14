@@ -42,10 +42,15 @@ function remove_files {
         PROFILE=$1
         MODULE=$2
         FILES=$3
-        log " ** removing files to restore $MODULE from $PROFILE"
-        rm -f $LOG_TMP
-        rm -rf -- $(echo $FILES) 2>>$LOG_TMP
-        catlog
+        SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
+        if [ ! -d "$SAVED_FILES" ]; then
+                log " ** not removing files for $MODULE in $PROFILE as no saved files were found"
+        else
+                log " ** removing files to restore $MODULE from $PROFILE"
+                rm -f $LOG_TMP
+                rm -rf -- $(echo $FILES) 2>>$LOG_TMP
+                catlog
+        fi
 }
 
 function save_files {
