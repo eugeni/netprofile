@@ -17,12 +17,16 @@ shorewall6"
 
 # special actions to perform after saving profile
 function save {
-	PROFILE=$1
-	echo "$NAME: Profile $PROFILE saved"
+        PROFILE=$1
+        if [ "a$VERBOSE" = "a1" ]; then
+                echo "$NAME: Profile $PROFILE saved"
+        fi
 }
 
 # special actions to perform after setting a profile
 function restore {
-	PROFILE=$1
-	echo "$NAME: Profile $PROFILE restored"
+        PROFILE=$1
+        if [ "a$VERBOSE" = "a1" ]; then
+                echo "$NAME: Profile $PROFILE restored"
+        fi
 }
