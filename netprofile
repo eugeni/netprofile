@@ -110,7 +110,7 @@ function restore_profile {
                 remove_files "$PROFILE" "$NAME" "$FILES"
                 print_debug "Restoring files for $NAME"
                 restore_files "$PROFILE" "$NAME" "$FILES"
-                if [ ! "a$RESTART_SERVICES" = "0" ]; then
+                if [ ! "a$RESTART_SERVICES" = "a0" ]; then
                         print_debug "Restarting services for $NAME"
                         restart_services "$SERVICES"
                 fi
@@ -231,17 +231,20 @@ function reload_netapplet {
 
 function usage {
         cat << EOF
-Usage: $0 <switch|current|list|delete> [profile]
+Usage: $0 <boot|switch|current|list|delete> [profile]
 
 The switch operation will save the system configuration into current profile,
 and restore files belonging to the new profile.  If the new profile does not
-exists, it will be created with base on current configuration. If no profile is
-given, netprofile will attempt to determine the profile from the kernel command
-line.
+exists, it will be created with base on current configuration.
+
+The boot operation will attempt to determine the profile from the kernel
+command line, or show user a menu to select the desired profile.
 
 The current operation will print the currently used profile.
 
 The list operation will list available profiles.
+
+The delete operation will delete an existent profile.
 
 EOF
 }
@@ -255,8 +258,8 @@ fi
 
 ACTION="$1"
 NEW_PROFILE="$2"
-
 CURPROFILE=$(cat $CURRENT)
+
 if [ "a$ACTION" = "aswitch" ]; then
         check_root
         check_current_profile
@@ -264,7 +267,7 @@ if [ "a$ACTION" = "aswitch" ]; then
         save_profile "$CURPROFILE"
         restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
         reload_netapplet
-if [ "a$ACTION" = "aboot" ]; then
+elif [ "a$ACTION" = "aboot" ]; then
         check_root
         get_boot_profile
         check_current_profile
