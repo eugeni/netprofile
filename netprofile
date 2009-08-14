@@ -94,6 +94,7 @@ function catlog {
 function restore_profile {
         # sets a network profile
         PROFILE=$1
+        RESTART_SERVICES=${1:-0}
         # do we have a profile?
         if [ ! -d "$PROFILES/$PROFILE" ]; then
                 log "Profile $PROFILE does not exists"
@@ -109,8 +110,10 @@ function restore_profile {
                 remove_files "$PROFILE" "$NAME" "$FILES"
                 print_debug "Restoring files for $NAME"
                 restore_files "$PROFILE" "$NAME" "$FILES"
-                print_debug "Restarting services for $NAME"
-                restart_services "$SERVICES"
+                if [ ! "a$RESTART_SERVICES" = "0" ]; then
+                        print_debug "Restarting services for $NAME"
+                        restart_services "$SERVICES"
+                fi
                 restore "$PROFILE"
         done
         # mark current profile as restored
@@ -156,18 +159,66 @@ function check_root {
 
 function check_current_profile {
         if [ -z "$NEW_PROFILE" ]; then
-                # get profile name from cmdline
-                NEWPROFILE=$(cat /proc/cmdline | tr ' ' '\n' | grep PROFILE | cut -f 2 -d =)
-        fi
-
-        if [ -z "$NEW_PROFILE" ]; then
-                echo "Error: no profile specified, and no profile selected on boot. Aborting."
+                echo "Error: no profile specified"
                 exit 1
         fi
 
         if [ "a$NEW_PROFILE" = "a$CURPROFILE" ]; then
                 echo "The $NEW_PROFILE is the current profile."
                 exit 1
+        fi
+}
+
+function get_boot_profile {
+        if [ -z "$NEW_PROFILE" ]; then
+                # get profile name from cmdline
+                NEWPROFILE=$(cat /proc/cmdline | tr ' ' '\n' | grep PROFILE | cut -f 2 -d =)
+        fi
+        # no profile passed on command line, show user a menu
+        if [[ -z "$NEWPROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
+                nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
+                if [[ "$nb_profiles" == "1" ]]; then
+                        NEWPROFILE=`basename /etc/netprofile/profiles/*`
+                else 
+                        _procsplash="`cat /proc/splash 2>/dev/null`"
+                        grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
+                        if [ -z "$_silent" -o ! -r /proc/splash -o -z "`echo $_procsplash|grep on`" ]; then
+                                if [[ -x /usr/bin/fbgrab ]]; then
+                                        rm -f /tmp/bootsplash.png
+                                        /usr/bin/fbgrab /tmp/bootsplash.png
+                                fi
+                        else
+                                if [[ -z $res ]]; then 
+                                        res=`fbresolution`
+                                fi
+                                if [[ -f /etc/sysconfig/bootsplash ]]; then
+                                        . /etc/sysconfig/bootsplash
+                                        theme=$THEME
+                                        if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+                                                function box() { true; }
+                                                . /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+                                        fi
+                                fi
+                                if [[ -f $silentjpeg ]]; then
+                                        rm -f /tmp/bootsplash.png
+                                        cp -f $silentjpeg /tmp/bootsplash.png
+                                fi
+                        fi
+
+                        pushd  /etc/netprofile/profiles/
+                        if [[ -n "$CURPROFILE" ]]; then 
+                                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a network profile" "$PROFILE" * | grep RESULT`
+                        else
+                                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a network profile" * | grep RESULT`
+                        fi
+                        if [[ "$_silent" == "yes" ]]; then
+                                if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
+                                        /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
+                                fi
+                        fi
+                        NEWPROFILE="$RESULT"
+                        popd
+                fi
         fi
 }
 
@@ -211,7 +262,15 @@ if [ "a$ACTION" = "aswitch" ]; then
         check_current_profile
         log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
         save_profile "$CURPROFILE"
-        restore_profile "$NEW_PROFILE" || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
+        restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
+        reload_netapplet
+if [ "a$ACTION" = "aboot" ]; then
+        check_root
+        get_boot_profile
+        check_current_profile
+        log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
+        save_profile "$CURPROFILE"
+        restore_profile "$NEW_PROFILE"
         reload_netapplet
 elif [ "a$ACTION" = "adelete" ]; then
         check_root
@@ -238,61 +297,3 @@ save_profile default
 exit 0
 
 # set-netprofile ends here
-
-# {{{ boot selection
-if [[ -z "$NEWPROFILE" ]]; then
-    # Check the kernel command line, profile are selectable
-    # right from the boot manager
-    eval `cat /proc/cmdline | tr ' ' '\n' | grep PROFILE`
-    NEWPROFILE="$PROFILE"
-    if [[ -z "$NEWPROFILE" && -x /usr/bin/fbmenu && -d /etc/netprofile/profiles/ ]]; then
-        nb_profiles=`ls /etc/netprofile/profiles | wc -l`;
-        if [[ "$nb_profiles" == "1" ]]; then
-            NEWPROFILE=`basename /etc/netprofile/profiles/*`
-        else 
-            _procsplash="`cat /proc/splash 2>/dev/null`"
-            grep -q silent /proc/cmdline && grep -q silent /proc/splash && _silent="yes"
-            if [ -z "$_silent" -o ! -r /proc/splash -o -z "`echo $_procsplash|grep on`" ]; then
-                if [[ -x /usr/bin/fbgrab ]]; then
-                    rm -f /tmp/bootsplash.png
-                    /usr/bin/fbgrab /tmp/bootsplash.png
-                fi
-            else
-                if [[ -z $res ]]; then 
-                    res=`fbresolution`
-                fi
-                if [[ -f /etc/sysconfig/bootsplash ]]; then
-                    . /etc/sysconfig/bootsplash
-                    theme=$THEME
-                    if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
-                        function box() { true; }
-                        . /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
-                    fi
-                fi
-                if [[ -f $silentjpeg ]]; then
-                    rm -f /tmp/bootsplash.png
-                    cp -f $silentjpeg /tmp/bootsplash.png
-                fi
-            fi
-
-            if [[ -r $TOP/current ]]; then
-                eval `cat $TOP/current`
-            fi
-            pushd  /etc/netprofile/profiles/
-            if [[ -n "$PROFILE" ]]; then 
-                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" "$PROFILE" * | grep RESULT`
-            else 
-                eval `GTK2_RC_FILES=/etc/bootsplash/themes/current/config/gtkrc /usr/bin/fbmenu 10 "Choose a profile" * | grep RESULT`
-            fi
-            if [[ "$_silent" == "yes" ]]; then
-                if [[ -f /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg ]]; then
-                    /sbin/splash -s -u 0 /etc/bootsplash/themes/$theme/config/bootsplash-$res.cfg
-                fi
-            fi
-            NEWPROFILE="$RESULT"
-            popd
-        fi
-    fi
-fi
-# }}}
-
