@@ -239,26 +239,26 @@ Usage: $0 [-options] <operation> [profile]
 The following operations are supported:
 
 operations on network profiles:
- switch         save the system configuration into current profile, and
+ switch [-v]    save the system configuration into current profile, and
                 restore files belonging to the new profile. If the new
                 profile does not exists, it will be created with base on
                 current configuration.
 
- boot           determine the desired profile from the kernel command line,
+ boot [-v]      determine the desired profile from the kernel command line,
                 or show user a menu to select the desired profile.
 
- delete         delete an existent profile.
+ delete [-v]    delete an existent profile.
 
  current        display the currently used profile.
 
- list           list available profiles.
+ list [-v]      list available profiles.
 
 operations on netprofile modules:
- modules        list available modules
+ modules [-v]           list available modules
 
- module_enable  enables a netprofile module
+ module_enable [-v]     enables a netprofile module
 
- module_disable disables a netprofile module
+ module_disable [-v]    disables a netprofile module
 
 
 Options:
@@ -344,12 +344,18 @@ elif [ "a$ACTION" = "amodules" ]; then
                         # is module enabled?
                         if [ -x "$module" ]; then
                                 ENABLED="+"
+                                ENABLED_VERBOSE="enabled"
                         else
                                 ENABLED="-"
+                                ENABLED_VERBOSE="disabled"
                         fi
                         . $module
 
-                        echo -e "$module\t($ENABLED):\t$NAME ($DESCRIPTION)"
+                        if [ "a$VERBOSE" = "a1" ]; then
+                                echo -e "$module\t($ENABLED_VERBOSE):\t$NAME ($DESCRIPTION)"
+                        else
+                                echo -e "$module\t$ENABLED\t$NAME\t$DESCRIPTION"
+                        fi
                 done
         )
 elif [ "a$ACTION" = "amodule_enable" ]; then
@@ -362,6 +368,9 @@ elif [ "a$ACTION" = "amodule_enable" ]; then
                         echo "Error: module $MODULE not found"
                         exit 1
                 fi
+                if [ "a$VERBOSE" = "a1" ]; then
+                        echo "Enabling $MODULE"
+                fi
                 chmod +x $MODULE
         )
 elif [ "a$ACTION" = "amodule_disable" ]; then
@@ -373,6 +382,9 @@ elif [ "a$ACTION" = "amodule_disable" ]; then
                 if [ ! -f "$MODULE" ]; then
                         echo "Error: module $MODULE not found"
                         exit 1
+                fi
+                if [ "a$VERBOSE" = "a1" ]; then
+                        echo "Disabling $MODULE"
                 fi
                 chmod -x $MODULE
         )
