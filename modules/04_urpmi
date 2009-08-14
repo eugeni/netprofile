@@ -1,0 +1,28 @@
+# netprofile module
+#
+# this module contains settings for saving/restore the urpmi settings
+
+NAME="urpmi"
+DESCRIPTION="Urpmi settings"
+
+# list of files to be saved by netprofile
+FILES="/etc/urpmi/"
+
+# list of services to be restarted by netprofile
+SERVICES=""
+
+# special actions to perform after saving profile
+function save {
+        PROFILE=$1
+        if [ "a$VERBOSE" = "a1" ]; then
+                echo "$NAME: Profile $PROFILE saved"
+        fi
+}
+
+# special actions to perform after setting a profile
+function restore {
+        PROFILE=$1
+        if [ "a$VERBOSE" = "a1" ]; then
+                echo "$NAME: Profile $PROFILE restored"
+        fi
+}
