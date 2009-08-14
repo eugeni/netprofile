@@ -12,8 +12,7 @@ ETCDIR=/etc/netprofile
 BASHDIR=/etc/bash_completion.d
 IFUPDIR=/etc/sysconfig/network-scripts/ifup.d
 
-BINFILES=netprofile set-netprofile clone-netprofile save-netprofile \
- add-to-netprofile remove-from-netprofile
+BINFILES=netprofile set-netprofile
 FILES= $(BINFILES) \
  netprofile.spec Makefile ChangeLog list bash.completion netprofile.ifup
 
@@ -30,8 +29,9 @@ clean:
 	rm -f *~
 
 install:
-	-mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(ETCDIR)/profiles $(DESTDIR)/$(BASHDIR) $(DESTDIR)$(IFUPDIR)
-	for f in $(BINFILES); do install $$f $(DESTDIR)$(BINDIR); done
+	-mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(ETCDIR)/profiles $(DESTDIR)$(ETCDIR)/modules $(DESTDIR)/$(BASHDIR) $(DESTDIR)$(IFUPDIR)
+	for f in $(BINFILES); do install -m755 $$f $(DESTDIR)$(BINDIR); done
+	for f in modules/*; do install -m755 $$f $(DESTDIR)$(ETCDIR)/modules; done
 	install -m 644 list  $(DESTDIR)$(ETCDIR)/
 	install -m 644 bash.completion $(DESTDIR)/$(BASHDIR)/$(PACKAGE)
 	install -m 755 netprofile.ifup $(DESTDIR)$(IFUPDIR)/netprofile

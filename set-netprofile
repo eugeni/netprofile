@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# A wrapper function to restore network profile on boot.
+#
+
+PROFILE="$1"
+
+if [ "a$PROFILE" = "a" ]; then
+        exec /sbin/netprofile boot
+else
+        exec /sbin/netprofile switch $PROFILE
+fi
