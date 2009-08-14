@@ -312,16 +312,20 @@ elif [ "a$ACTION" = "acurrent" ]; then
         exit 0
 elif [ "a$ACTION" = "alist" ]; then
         # shows available netprofiles
-        AVAILABLE_PROFILES=""
         (
+                AVAILABLE_PROFILES=""
                 cd $PROFILES
-                for z in *; do
-                        if [ "$z" = "$CURPROFILE" ]; then
-                                AVAILABLE_PROFILES="$AVAILABLE_PROFILES [$z]"
-                        else
-                                AVAILABLE_PROFILES="$AVAILABLE_PROFILES $z"
-                        fi
-                done
+                if [ "a$VERBOSE" = "a1" ]; then
+                        for z in *; do
+                                if [ "$z" = "$CURPROFILE" ]; then
+                                        AVAILABLE_PROFILES="$AVAILABLE_PROFILES [$z]"
+                                else
+                                        AVAILABLE_PROFILES="$AVAILABLE_PROFILES $z"
+                                fi
+                        done
+                else
+                        AVAILABLE_PROFILES="*"
+                fi
                 echo $AVAILABLE_PROFILES
         )
         exit 0
