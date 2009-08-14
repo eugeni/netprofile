@@ -1,3 +1,5 @@
+- added urpmi module
+
 0.20:
  - rewritten netprofile to use a single main executable file and action-based commands
  - added support for custom modules
