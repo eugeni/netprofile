@@ -116,7 +116,10 @@ function restore_profile {
                 fi
                 restore "$PROFILE"
         done
-        # mark current profile as restored
+}
+
+function update_current {
+        PROFILE=$1
         echo "$PROFILE" > $CURRENT
 }
 
@@ -258,15 +261,22 @@ fi
 
 ACTION="$1"
 NEW_PROFILE="$2"
-CURPROFILE=$(cat $CURRENT)
+CURPROFILE=$(cat $CURRENT 2>/dev/null)
 
 if [ "a$ACTION" = "aswitch" ]; then
         check_root
         check_current_profile
-        log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
-        save_profile "$CURPROFILE"
-        restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
-        reload_netapplet
+        if [ ! -n "$CURPROFILE" ]; then
+                # no current profile
+                log "Creating initial profile $NEW_PROFILE"
+                save_profile "$NEW_PROFILE"
+        else
+                log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
+                save_profile "$CURPROFILE"
+                restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
+                reload_netapplet
+        fi
+        update_current "$NEW_PROFILE"
 elif [ "a$ACTION" = "aboot" ]; then
         check_root
         get_boot_profile
@@ -274,6 +284,7 @@ elif [ "a$ACTION" = "aboot" ]; then
         log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
         save_profile "$CURPROFILE"
         restore_profile "$NEW_PROFILE"
+        update_current "$NEW_PROFILE"
         reload_netapplet
 elif [ "a$ACTION" = "adelete" ]; then
         check_root
