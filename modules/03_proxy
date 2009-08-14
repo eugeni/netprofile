@@ -4,7 +4,7 @@
 # in different network profiles
 
 NAME="proxy"
-DESCRIPTION="Save/restore proxy settings"
+DESCRIPTION="Proxy settings"
 
 # list of files to be saved by netprofile
 FILES="/etc/profile.d/proxy.*

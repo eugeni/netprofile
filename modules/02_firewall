@@ -4,7 +4,7 @@
 # in different network profiles
 
 NAME="firewall"
-DESCRIPTION="Save/restore firewall settings"
+DESCRIPTION="Firewall settings"
 
 # list of files to be saved by netprofile
 FILES="/etc/sysconfig/iptables

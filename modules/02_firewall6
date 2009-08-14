@@ -4,7 +4,7 @@
 # in different network profiles
 
 NAME="firewall6"
-DESCRIPTION="Save/restore firewall settings (IPv6)"
+DESCRIPTION="Firewall settings (IPv6)"
 
 # list of files to be saved by netprofile
 FILES="/etc/sysconfig/ip6tables
