@@ -15,7 +15,7 @@ NETPROFILE=/etc/netprofile
 PROFILES=$NETPROFILE/profiles
 MODULES=$NETPROFILE/modules
 CURRENT=$NETPROFILE/current
-VERBOSE=1
+VERBOSE=0
 LOG=/var/log/netprofile.log
 DATE=$(date)
 LOG_TMP=$(mktemp)
@@ -234,7 +234,7 @@ function reload_netapplet {
 
 function usage {
         cat << EOF
-Usage: $0 <boot|switch|current|list|delete> [profile]
+Usage: $0 [-options] <boot|switch|current|list|delete> [profile]
 
 The switch operation will save the system configuration into current profile,
 and restore files belonging to the new profile.  If the new profile does not
@@ -249,15 +249,31 @@ The list operation will list available profiles.
 
 The delete operation will delete an existent profile.
 
+Options:
+  -v, --verbose                 show detailed information on profile actions
+  -h, --help                    show this help message
+
 EOF
+exit 0
 }
 
 NO_RESTART_NETWORK=
 
 if [ "a$1" = "a" ]; then
         usage
-        exit 1
 fi
+
+args=`getopt -o v,h -l verbose,help -n "$0" -- "$@"`
+eval set -- "$args"
+
+while true; do
+        case "$1" in
+                -v|--verbose) VERBOSE=1;        shift 1;;
+                -h|--help) usage;               shift 1;;
+                --)                             shift ; break;;
+                *) echo "Invalid argument: $1"; exit 1 ;;
+        esac
+done
 
 ACTION="$1"
 NEW_PROFILE="$2"
