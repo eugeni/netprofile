@@ -1,6 +1,6 @@
 0.20:
  - rewritten netprofile to use a single main executable file and action-based commands
- - added support for custom plugins
+ - added support for custom modules
 
 0.10:
  - original netprofile, written by Frederic Lepied
