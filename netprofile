@@ -234,23 +234,36 @@ function reload_netapplet {
 
 function usage {
         cat << EOF
-Usage: $0 [-options] <boot|switch|current|list|delete> [profile]
+Usage: $0 [-options] <operation> [profile]
 
-The switch operation will save the system configuration into current profile,
-and restore files belonging to the new profile.  If the new profile does not
-exists, it will be created with base on current configuration.
+The following operations are supported:
 
-The boot operation will attempt to determine the profile from the kernel
-command line, or show user a menu to select the desired profile.
+operations on network profiles:
+ switch         save the system configuration into current profile, and
+                restore files belonging to the new profile. If the new
+                profile does not exists, it will be created with base on
+                current configuration.
 
-The current operation will print the currently used profile.
+ boot           determine the desired profile from the kernel command line,
+                or show user a menu to select the desired profile.
 
-The list operation will list available profiles.
+ delete         delete an existent profile.
 
-The delete operation will delete an existent profile.
+ current        display the currently used profile.
+
+ list           list available profiles.
+
+operations on netprofile modules:
+ modules        list available modules
+
+ module_enable  enables a netprofile module
+
+ module_disable disables a netprofile module
+
 
 Options:
-  -v, --verbose                 show detailed information on profile actions
+  -v, --verbose                 show detailed information for performed
+                                operations
   -h, --help                    show this help message
 
 EOF
@@ -323,6 +336,46 @@ elif [ "a$ACTION" = "alist" ]; then
                         done
         )
         exit 0
+elif [ "a$ACTION" = "amodules" ]; then
+        # show available modules
+        (
+                cd $MODULES
+                for module in *; do
+                        # is module enabled?
+                        if [ -x "$module" ]; then
+                                ENABLED="+"
+                        else
+                                ENABLED="-"
+                        fi
+                        . $module
+
+                        echo -e "$module\t($ENABLED):\t$NAME ($DESCRIPTION)"
+                done
+        )
+elif [ "a$ACTION" = "amodule_enable" ]; then
+        MODULE=$2
+        check_root
+        # enable a module
+        (
+                cd $MODULES
+                if [ ! -f "$MODULE" ]; then
+                        echo "Error: module $MODULE not found"
+                        exit 1
+                fi
+                chmod +x $MODULE
+        )
+elif [ "a$ACTION" = "amodule_disable" ]; then
+        MODULE=$2
+        check_root
+        # enable a module
+        (
+                cd $MODULES
+                if [ ! -f "$MODULE" ]; then
+                        echo "Error: module $MODULE not found"
+                        exit 1
+                fi
+                chmod -x $MODULE
+        )
 else
         echo "$0: unknown action $ACTION"
         exit 1
