@@ -32,10 +32,14 @@ function restore_files {
         FILES=$3
         # restoring old files
         SAVED_FILES="$PROFILES/$PROFILE/$MODULE"
-        log " ** restoring files for $MODULE from $SAVED_FILES"
-        rm -f $LOG_TMP
-        (cd $SAVED_FILES && tar cpf - . 2>>$LOG_TMP) | (cd / && tar xpf - 2>>$LOG_TMP)
-        catlog
+        if [ ! -d "$SAVED_FILES" ]; then
+                log " ** no saved files for $MODULE were found in $PROFILE"
+        else
+                log " ** restoring files for $MODULE from $SAVED_FILES"
+                rm -f $LOG_TMP
+                (cd $SAVED_FILES && tar cpf - . 2>>$LOG_TMP) | (cd / && tar xpf - 2>>$LOG_TMP)
+                catlog
+        fi
 }
 
 function remove_files {
