@@ -70,6 +70,24 @@ configuration. In its current version, the following modules are provided:
    - This module is responsible for saving/restoring system urpmi
      configuration.
 
+For each module you can define the following variables:
+ - FILES
+   - specifies the list of files to be saved/restored when switching to a
+     different profile
+ - SERVICES
+   - lists the services that must be restarted when switching to a different
+     profile
+ - save function
+   - a specific function that must be executed when the profile is saved
+     before switching to a new one. You can put any code there (for example,
+     send a dbus message, send an email, execute a program, and so on )
+ - restore function
+   - a specific function that must be executed when the profile is restored
+
+Of course, you may leave any of those variables/functions blank if you do
+not need them.
+
+
 Known bugs and limitations
 --------------------------
 
