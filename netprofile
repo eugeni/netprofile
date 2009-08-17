@@ -116,6 +116,10 @@ function restore_profile {
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
+                # unsetting old variables
+                unset NAME SERVICES
+                # unsetting old functions
+                unset -f save restore
                 . $module
                 print_debug "Removing old files for $NAME"
                 remove_files "$PROFILE" "$NAME" "$FILES"
@@ -125,7 +129,10 @@ function restore_profile {
                         print_debug "Restarting services for $NAME"
                         restart_services "$SERVICES"
                 fi
-                restore "$PROFILE"
+                # calling module-specific hook
+                if [ "`type -t restore`" == 'function' ]; then
+                        restore "$PROFILE"
+                fi
         done
 }
 
@@ -142,10 +149,16 @@ function save_profile {
         for module in $MODULES/*; do
                 # if module is not executable, disable it
                 test -x $module || continue
+                # unsetting old variables
+                unset NAME SERVICES
+                # unsetting old functions
+                unset -f save restore
                 . $module
                 save_files "$PROFILE" "$NAME" "$FILES"
                 # calling module-specific hook
-                save "$PROFILE"
+                if [ "`type -t save`" == 'function' ]; then
+                        save "$PROFILE"
+                fi
         done
 }
 
