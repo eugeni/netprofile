@@ -1,3 +1,8 @@
+0.22:
+ - ensuring variables from different modules are handled properly
+ - updated documentation
+ - removed empty save/restore functions from modules where they are not needed
+
 0.21:
  - only restart services if they are enabled
  - only remove files from system configuration if they were saved by new profile
