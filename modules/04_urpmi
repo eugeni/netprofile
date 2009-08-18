@@ -6,4 +6,5 @@ NAME="urpmi"
 DESCRIPTION="Urpmi settings"
 
 # list of files to be saved by netprofile
-FILES="/etc/urpmi/"
+FILES="/etc/urpmi/
+/var/lib/urpmi/"
