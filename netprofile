@@ -327,9 +327,9 @@ if [ "a$ACTION" = "aswitch" ]; then
                 log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
                 save_profile "$CURPROFILE"
                 restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
-                reload_netapplet
         fi
         update_current "$NEW_PROFILE"
+        reload_netapplet
 elif [ "a$ACTION" = "aboot" ]; then
         check_root
         get_boot_profile
@@ -344,6 +344,7 @@ elif [ "a$ACTION" = "adelete" ]; then
         check_current_profile
         print_debug "Removing profile $NEW_PROFILE"
         remove_profile "$NEW_PROFILE"
+        reload_netapplet
 elif [ "a$ACTION" = "acurrent" ]; then
         echo $CURPROFILE
         exit 0
