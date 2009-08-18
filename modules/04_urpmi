@@ -15,7 +15,17 @@ function restore {
                 mkdir /var/lib/urpmi
                 log "The urpmi database is out of sync, updating now"
                 notify "The urpmi database is out of sync, updating now"
-                # wait a bit for network to be up
-                sleep 2 && urpmi.update -a
+                # network could still be down, so retry a few times
+                for retry in $(seq 1 5); do 
+                        urpmi.update -a
+                        ret=$?
+                        if [ ! "$ret" = "0" ]; then
+                                sleep 1
+                        fi
+                done
+                if [ ! "$ret" = "0" ]; then
+                        log "Was unable to update urpmi cache"
+                        notify "The urpmi database could not be updated at this time because the network was not ready. You will have to update it manually for this network profile."
+                fi
         fi
 }
