@@ -8,3 +8,14 @@ DESCRIPTION="Urpmi settings"
 # list of files to be saved by netprofile
 FILES="/etc/urpmi/
 /var/lib/urpmi/"
+
+function restore {
+        if [ ! -d /var/lib/urpmi/ ]; then
+                # we need to update the synthesis files
+                mkdir /var/lib/urpmi
+                log "The urpmi database is out of sync, updating now"
+                notify "The urpmi database is out of sync, updating now"
+                # wait a bit for network to be up
+                sleep 2 && urpmi.update -a
+        fi
+}
