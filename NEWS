@@ -1,3 +1,4 @@
+0.23:
 - improved urpmi module
 - implemented user notifications when switching profiles
 - correctly reloading net_applet
