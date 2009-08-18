@@ -256,6 +256,14 @@ function reload_netapplet {
         [[ -n "$PID" ]] && kill -HUP $PID
 }
 
+function notify {
+        MESSAGE="$1"
+        DBUS_SEND=`which dbus-send 2>/dev/null`
+        if [ -x "$DBUS_SEND" ]; then
+                $DBUS_SEND --system --type=signal /com/mandriva/user com.mandriva.user.custom_notification string:"NetProfile" string:"$MESSAGE"
+        fi
+}
+
 function usage {
         cat << EOF
 Usage: $0 [-options] <operation> [profile]
@@ -326,9 +334,11 @@ if [ "a$ACTION" = "aswitch" ]; then
         else
                 log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
                 save_profile "$CURPROFILE"
+                notify "Switching to network profile $NEW_PROFILE. You network might lose connectivity for a few moments, please hold on."
                 restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
         fi
         update_current "$NEW_PROFILE"
+        notify "You are now using the network profile $NEW_PROFILE"
         reload_netapplet
 elif [ "a$ACTION" = "aboot" ]; then
         check_root
