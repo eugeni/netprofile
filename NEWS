@@ -1,3 +1,5 @@
+- implemented user notifications when switching profiles
+
 0.22:
  - ensuring variables from different modules are handled properly
  - updated documentation

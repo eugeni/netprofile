@@ -334,7 +334,7 @@ if [ "a$ACTION" = "aswitch" ]; then
         else
                 log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
                 save_profile "$CURPROFILE"
-                notify "Switching to network profile $NEW_PROFILE. You network might lose connectivity for a few moments, please hold on."
+                notify "Switching to network profile $NEW_PROFILE, please wait a few moments..."
                 restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
         fi
         update_current "$NEW_PROFILE"
