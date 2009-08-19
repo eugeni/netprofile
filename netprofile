@@ -192,7 +192,7 @@ function check_current_profile {
 
         if [ "a$NEW_PROFILE" = "a$CURPROFILE" ]; then
                 echo "The $NEW_PROFILE is the current profile."
-                exit 1
+                exit 0
         fi
 }
 
