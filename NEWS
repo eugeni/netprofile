@@ -1,3 +1,7 @@
+0.24:
+- improve urpmi.update handling when necessary
+- do not show misleading error message on startup
+
 0.23:
 - improved urpmi module
 - implemented user notifications when switching profiles
