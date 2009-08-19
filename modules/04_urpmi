@@ -21,6 +21,9 @@ function restore {
                         ret=$?
                         if [ ! "$ret" = "0" ]; then
                                 sleep 1
+                                continue
+                        else
+                                break
                         fi
                 done
                 if [ ! "$ret" = "0" ]; then
