@@ -20,6 +20,8 @@ LOG=/var/log/netprofile.log
 DATE=$(date)
 LOG_TMP=$(mktemp)
 
+DEFAULT_PROFILE=default
+
 function cleanup {
         rm -f $LOG_TMP
 }
@@ -285,6 +287,15 @@ operations on network profiles:
 
  list [-v]      list available profiles.
 
+ reset          resets the network profiles configuration. This action will
+                have the following effects:
+                 - all existent profiles will be removed
+                 - current system configuration will be saved as '$DEFAULT_PROFILE'
+                   profile
+                you might want to use this action when a big system change
+                was performed (distro upgrade), or you simple want to start
+                over with a new configuration.
+
 operations on netprofile modules:
  modules [-v]           list available modules
 
@@ -371,6 +382,25 @@ elif [ "a$ACTION" = "alist" ]; then
                         done
         )
         exit 0
+elif [ "a$ACTION" = "areset" ]; then
+        # resets netprofile configuration
+        check_root
+        (
+                cd $PROFILES
+                for z in *; do
+                        if [ ! "$CURPROFILE" = "$z" ]; then
+                                if [ "a$VERBOSE" = "a" ]; then
+                                        echo "Removing profile $z"
+                                fi
+                                remove_profile $z
+                        fi
+                done
+                if [ "a$VERBOSE" = "a" ]; then
+                        echo "Setting profile $CURPROFILE as new $DEFAULT_PROFILE profile"
+                fi
+                mv "$CURPROFILE" $DEFAULT_PROFILE && update_current "$DEFAULT_PROFILE"
+        )
+        reload_netapplet
 elif [ "a$ACTION" = "amodules" ]; then
         # show available modules
         (
