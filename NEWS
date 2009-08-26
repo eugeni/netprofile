@@ -1,3 +1,5 @@
+- implemented 'reset' action
+
 0.24:
 - improve urpmi.update handling when necessary
 - do not show misleading error message on startup
