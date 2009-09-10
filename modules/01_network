@@ -25,6 +25,7 @@ FILES="/etc/hosts
 /etc/sysconfig/network-scripts/cellular.d/
 /etc/sysconfig/network-scripts/wireless.d/
 /etc/sysconfig/network-scripts/vpn.d/
+/etc/sysconfig/network-scripts/route-*
 /var/lib/dhcp/*leases"
 
 # list of services to be restarted by netprofile
