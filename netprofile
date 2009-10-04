@@ -290,11 +290,19 @@ operations on network profiles:
  reset          resets the network profiles configuration. This action will
                 have the following effects:
                  - all existent profiles will be removed
-                 - current system configuration will be saved as '$DEFAULT_PROFILE'
-                   profile
+                 - current system configuration will be saved as
+                   '$DEFAULT_PROFILE' profile
                 you might want to use this action when a big system change
                 was performed (distro upgrade), or you simple want to start
                 over with a new configuration.
+
+advanced options:
+ save [-v]      save current settings into the current profile without switching
+                to a different profile
+ load [-v]      load a different profile without saving current settings
+                basically, the sequence of 'netprofile save; netprofile load'
+                does exactly the same thing as 'netprofile switch', but with
+                higher degree of control over the performed actions.
 
 operations on netprofile modules:
  modules [-v]           list available modules
@@ -348,6 +356,18 @@ if [ "a$ACTION" = "aswitch" ]; then
                 notify "Switching to network profile $NEW_PROFILE, please wait a few moments..."
                 restore_profile "$NEW_PROFILE" 1 || (log "Creating new profile $NEW_PROFILE"; save_profile "$NEW_PROFILE")
         fi
+        update_current "$NEW_PROFILE"
+        notify "You are now using the network profile $NEW_PROFILE"
+        reload_netapplet
+elif [ "a$ACTION" = "asave" ]; then
+        check_root
+        save_profile "$CURPROFILE"
+elif [ "a$ACTION" = "aload" ]; then
+        check_root
+        check_current_profile
+        log "Switching from profile $CURPROFILE to profile $NEW_PROFILE"
+        notify "Switching to network profile $NEW_PROFILE, please wait a few moments..."
+        restore_profile "$NEW_PROFILE" 1
         update_current "$NEW_PROFILE"
         notify "You are now using the network profile $NEW_PROFILE"
         reload_netapplet
