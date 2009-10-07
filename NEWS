@@ -1,3 +1,5 @@
+0.25:
+- implemented 'save' and 'load' actions.
 - implemented 'reset' action
 
 0.24:
