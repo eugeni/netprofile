@@ -1,3 +1,4 @@
+0.26:
 - integrate nicely with plymouth
 - do not fail on boot if fbgrab is not available (#54471)
 
