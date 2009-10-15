@@ -239,6 +239,11 @@ function get_boot_profile {
 				/bin/plymouth pause-progress
 				message=$(echo -ne "Select network profile:\n$profiles")
 				/bin/plymouth message --text="$message"
+				# show the message on screen, as plymouth seems not to work well
+				# with text mode :(
+				echo
+				echo $message
+				echo
 				# using /var/run/netprofile_boot as flag to indicate that user
 				# has chosen a profile. If no profile was chosen, leave after
 				# 5 seconds
@@ -248,9 +253,11 @@ function get_boot_profile {
 					if [ ! -f /var/run/netprofile_boot ]; then
 						# kill pending plymouth process, otherwise
 						# we'll hang later in boot stage
-						kill $(pidof plymouth)
+						kill $(pidof plymouth) > /dev/null 2>&1
 						/bin/plymouth unpause-progress
-						/bin/plymouth message --text="Using current network profile ($(netprofile current))"
+						message="Using current network profile ($(netprofile current))"
+						/bin/plymouth message --text="$message"
+						echo $message
 					else
 						rm -f /var/run/netprofile_boot
 					fi
