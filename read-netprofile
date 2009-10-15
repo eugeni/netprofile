@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# A wrapper function to restore network profile on boot.
+# It is called from plymouthd, passing profile index in stdin
+#
+
+read key
+
+# signal main script saying that a profile was selected
+touch /var/run/netprofile_boot
+
+# find out what profile was selected
+pushd  /etc/netprofile/profiles/ > /dev/null 2>&1
+count=1
+profiles=""
+keys=""
+for z in *; do
+	# is it this profile?
+	if [ "a$key" = "a$count" ]; then
+		PROFILE=$z
+		/sbin/set-netprofile "$PROFILE"
+	fi
+	count=$((count + 1))
+done
+popd > /dev/null 2>&1
+
+/bin/plymouth unpause-progress
+/bin/plymouth message --text="Using network profile $PROFILE"
+
