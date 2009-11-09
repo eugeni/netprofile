@@ -12,7 +12,7 @@ ETCDIR=/etc/netprofile
 BASHDIR=/etc/bash_completion.d
 IFUPDIR=/etc/sysconfig/network-scripts/ifup.d
 
-BINFILES=netprofile set-netprofile
+BINFILES=netprofile read-netprofile set-netprofile
 FILES= $(BINFILES) netprofile.spec Makefile ChangeLog NEWS README TODO bash.completion netprofile.ifup modules/
 
 PACKAGE=netprofile
