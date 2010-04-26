@@ -1,0 +1,13 @@
+# netprofile module
+#
+# this module contains settings for saving/restore the set of services
+# that should be running on different network profiles
+
+NAME="services"
+DESCRIPTION="Save and restore the active services"
+
+# list of files to be saved by netprofile
+FILES="/etc/rc.d/rc?.d"
+
+# list of services to be restarted by netprofile
+SERVICES=""
