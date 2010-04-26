@@ -11,3 +11,33 @@ FILES="/etc/rc.d/rc?.d"
 
 # list of services to be restarted by netprofile
 SERVICES=""
+
+function restore {
+        if [ -f $PROFILES/$PROFILE/services.list ]; then
+                # found the list of enabled services
+                # generate the list of currently enabled services
+                NEWSERVICES=$PROFILES/$PROFILE/services.list
+                OLDSERVICES=$PROFILES/$CURPROFILE/services.list
+                RUNLEVEL=$(runlevel | cut -f 2 -d ' ')
+                # now see what has changed
+                diff -u $OLDSERVICES $NEWSERVICES | grep -v '+++' | grep '^+' | sed -e "s/^+\([^ \t]*\).*${RUNLEVEL}:\(on\|off\).*/\1 \2/g" | while read s; do
+                        service=$(echo $s | cut -f 1 -d ' ')
+                        status=$(echo $s | cut -f 2 -d ' ')
+                        cur_status=$(grep $service $OLDSERVICES | grep -q ${RUNLEVEL}:on && echo on || echo off)
+                        if [ "$status" = "on" -a "$cur_status" = "off" ]; then
+                                log "Service $service will be stopped"
+                                notify "Service $service will be stopped"
+                                service $service stop
+                        elif [ "$status" = "off" -a "$cur_status" = "on" ]; then
+                                log "Service $service will be started"
+                                notify "Service $service will be started"
+                                service $service start
+                        fi
+                done
+                rm -f $TMPFILE
+        fi
+}
+
+function save {
+        chkconfig --list > $PROFILES/$PROFILE/services.list
+}
