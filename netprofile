@@ -119,7 +119,7 @@ function restore_profile {
                 # if module is not executable, disable it
                 test -x $module || continue
                 # unsetting old variables
-                unset NAME SERVICES
+                unset NAME SERVICES FILES
                 # unsetting old functions
                 unset -f save restore
                 . $module
@@ -152,7 +152,7 @@ function save_profile {
                 # if module is not executable, disable it
                 test -x $module || continue
                 # unsetting old variables
-                unset NAME SERVICES
+                unset NAME SERVICES FILES
                 # unsetting old functions
                 unset -f save restore
                 . $module
