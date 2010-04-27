@@ -1,4 +1,5 @@
 - support stopping and starting services when switching profiles
+- fix issues when module does not specifies any FILES at all.
 
 0.27:
 - install missing read-netprofile (#55451)
