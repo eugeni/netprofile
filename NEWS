@@ -1,3 +1,4 @@
+0.28:
 - support stopping and starting services when switching profiles
 - fix issues when module does not specifies any FILES at all.
 

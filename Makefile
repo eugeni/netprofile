@@ -16,7 +16,7 @@ BINFILES=netprofile read-netprofile set-netprofile
 FILES= $(BINFILES) netprofile.spec Makefile ChangeLog NEWS README TODO bash.completion netprofile.ifup modules/
 
 PACKAGE=netprofile
-VERSION=0.27
+VERSION=0.28
 
 all:
 
