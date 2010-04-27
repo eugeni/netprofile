@@ -25,13 +25,13 @@ function restore {
                         status=$(echo $s | cut -f 2 -d ' ')
                         cur_status=$(grep $service $OLDSERVICES | grep -q ${RUNLEVEL}:on && echo on || echo off)
                         if [ "$status" = "on" -a "$cur_status" = "off" ]; then
-                                log "Service $service will be stopped"
-                                notify "Service $service will be stopped"
-                                service $service stop
-                        elif [ "$status" = "off" -a "$cur_status" = "on" ]; then
                                 log "Service $service will be started"
                                 notify "Service $service will be started"
                                 service $service start
+                        elif [ "$status" = "off" -a "$cur_status" = "on" ]; then
+                                log "Service $service will be stopped"
+                                notify "Service $service will be stopped"
+                                service $service stop
                         fi
                 done
                 rm -f $TMPFILE
