@@ -34,7 +34,6 @@ function restore {
                                 chkconfig $service && service $service stop
                         fi
                 done
-                rm -f $TMPFILE
         fi
 }
 

@@ -1,3 +1,5 @@
 TODO
 
 - Perform netprofile operations atomically.
+- plugin for cups
+- plugin for network fs
