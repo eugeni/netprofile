@@ -210,67 +210,67 @@ function get_boot_profile {
                         NEW_PROFILE=`basename /etc/netprofile/profiles/*`
                 else 
                         pushd  /etc/netprofile/profiles/ > /dev/null 2>&1
-			count=1
-			profiles=""
-			keys=""
-			for z in *; do
-				if [ "a$profiles" = "a" ]; then
-					profiles="($count) $z"
-				else
-					profiles="$profiles ($count) $z"
-				fi
-				# is it current profile?
-				if [ "a$z" = "a$CURPROFILE" ]; then
-					profiles="${profiles}*"
-				fi
-				# update keystrokes
-				keys="${keys}${count}"
-				count=$((count + 1))
+                        count=1
+                        profiles=""
+                        keys=""
+                        for z in *; do
+                                if [ "a$profiles" = "a" ]; then
+                                        profiles="($count) $z"
+                                else
+                                        profiles="$profiles ($count) $z"
+                                fi
+                                # is it current profile?
+                                if [ "a$z" = "a$CURPROFILE" ]; then
+                                        profiles="${profiles}*"
+                                fi
+                                # update keystrokes
+                                keys="${keys}${count}"
+                                count=$((count + 1))
 
-				# we stop at 9 profiles to fit on screen
-				if [ $count -gt 9 ]; then
-					profiles="$profiles ..."
-					break
-				fi
-			done
+                                # we stop at 9 profiles to fit on screen
+                                if [ $count -gt 9 ]; then
+                                        profiles="$profiles ..."
+                                        break
+                                fi
+                        done
                         popd > /dev/null 2>&1
-			# show graphical choice if plymouth is running
-			if [ -x /bin/plymouth ] && /bin/plymouth --ping ; then
-				/bin/plymouth pause-progress
-				message=$(echo -ne "Select network profile:\n$profiles")
-				/bin/plymouth message --text="$message"
-				# show the message on screen, as plymouth seems not to work well
-				# with text mode :(
-				echo
-				echo $message
-				# using /var/run/netprofile_boot as flag to indicate that user
-				# has chosen a profile. If no profile was chosen, leave after
-				# 5 seconds
-				{
-					# stop waiting for keystroke after timeout
-					sleep 5
-					if [ ! -f /var/run/netprofile_boot ]; then
-						# kill pending plymouth process, otherwise
-						# we'll hang later in boot stage
-						kill $(pidof plymouth) > /dev/null 2>&1
-						/bin/plymouth unpause-progress
-						message="Using current network profile ($(netprofile current))"
-						/bin/plymouth message --text="$message"
-						echo
-						echo netprofile: $message
-					else
-						rm -f /var/run/netprofile_boot
-					fi
-					exit 0
-				}&
-				rm -f /var/run/netprofile_boot
-				exec 2>/dev/null
-				/bin/plymouth watch-keystroke --keys=$keys --command=/sbin/read-netprofile
-			else
-				# plymouth not available, should use text-based choice (ncurses?)
-				exit 0
-			fi
-			exit 0
+                        # show graphical choice if plymouth is running
+                        if [ -x /bin/plymouth ] && /bin/plymouth --ping ; then
+                                /bin/plymouth pause-progress
+                                message=$(echo -ne "Select network profile:\n$profiles")
+                                /bin/plymouth message --text="$message"
+                                # show the message on screen, as plymouth seems not to work well
+                                # with text mode :(
+                                echo
+                                echo $message
+                                # using /var/run/netprofile_boot as flag to indicate that user
+                                # has chosen a profile. If no profile was chosen, leave after
+                                # 5 seconds
+                                {
+                                        # stop waiting for keystroke after timeout
+                                        sleep 5
+                                        if [ ! -f /var/run/netprofile_boot ]; then
+                                                # kill pending plymouth process, otherwise
+                                                # we'll hang later in boot stage
+                                                kill $(pidof plymouth) > /dev/null 2>&1
+                                                /bin/plymouth unpause-progress
+                                                message="Using current network profile ($(netprofile current))"
+                                                /bin/plymouth message --text="$message"
+                                                echo
+                                                echo netprofile: $message
+                                        else
+                                                rm -f /var/run/netprofile_boot
+                                        fi
+                                        exit 0
+                                }&
+                                rm -f /var/run/netprofile_boot
+                                exec 2>/dev/null
+                                /bin/plymouth watch-keystroke --keys=$keys --command=/sbin/read-netprofile
+                        else
+                                # plymouth not available, should use text-based choice (ncurses?)
+                                exit 0
+                        fi
+                        exit 0
                 fi
         fi
 }
